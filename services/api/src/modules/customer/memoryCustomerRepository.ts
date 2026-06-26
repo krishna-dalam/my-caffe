@@ -32,6 +32,11 @@ export const createMemoryCustomerRepository = (): CustomerRepository => {
   let redemptions: Redemption[] = [];
 
   return {
+    async commitRedemption(_currentMembership, nextMembership, redemption) {
+      membership = nextMembership;
+      redemptions = [redemption, ...redemptions];
+    },
+
     async findCafeBySlug(slug) {
       return slug === demoCafe.slug ? demoCafe : null;
     },
@@ -48,12 +53,5 @@ export const createMemoryCustomerRepository = (): CustomerRepository => {
       return redemptions.filter((redemption) => redemption.cafeId === cafeId);
     },
 
-    async saveMembership(nextMembership) {
-      membership = nextMembership;
-    },
-
-    async saveRedemption(redemption) {
-      redemptions = [redemption, ...redemptions];
-    },
   };
 };

@@ -42,4 +42,9 @@ CAFE#{cafeId}               REDEMPTION#{redeemedAt}#{redemptionId}
 
 ## Current Status
 
-This slice adds the DynamoDB adapter scaffold, key helpers, and environment selection. Transactional membership decrement plus redemption writes will be enabled in a follow-up slice after CDK provisions the table.
+The DynamoDB adapter commits redemptions with a transaction:
+
+- conditionally update the membership only when the expected remaining count still matches and the membership is active
+- insert the redemption record with `attribute_not_exists` protection
+
+This prevents duplicated redemption records and avoids overwriting a concurrent membership update.

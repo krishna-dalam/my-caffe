@@ -66,8 +66,7 @@ export const createCustomerService = (repository: CustomerRepository): CustomerS
       verificationCode: Math.floor(1000 + Math.random() * 9000).toString(),
     };
 
-    await repository.saveMembership(nextMembership);
-    await repository.saveRedemption(redemption);
+    await repository.commitRedemption(membership, nextMembership, redemption);
 
     return {
       membership: nextMembership,

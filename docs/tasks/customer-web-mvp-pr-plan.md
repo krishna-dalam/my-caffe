@@ -194,7 +194,30 @@ Acceptance:
 - DynamoDB table name is validated before adapter use.
 - Single-table key shapes are covered by tests and documented.
 
-## PR 9: AWS CDK Foundation
+## PR 9: DynamoDB Transactional Redemption Writes
+
+Status: implemented in this working tree.
+
+Goal: make DynamoDB persistence perform membership decrement and redemption record creation in one transaction.
+
+Files:
+
+- `services/api/src/modules/customer/customerRepository.ts`
+- `services/api/src/modules/customer/customerService.ts`
+- `services/api/src/modules/customer/memoryCustomerRepository.ts`
+- `services/api/src/modules/customer/dynamodb/dynamoCustomerRepository.ts`
+- `services/api/src/modules/customer/dynamodb/dynamoCustomerRepository.test.ts`
+- `docs/data-model.md`
+
+Acceptance:
+
+- Repository boundary commits redemption and membership update as one operation.
+- Memory adapter keeps existing local behavior.
+- DynamoDB adapter writes a `TransactWriteCommand`.
+- DynamoDB transaction condition checks expected remaining count and active status.
+- Redemption put uses `attribute_not_exists` protection.
+
+## PR 10: AWS CDK Foundation
 
 Status: implemented in this working tree.
 
@@ -215,7 +238,7 @@ Acceptance:
 - HTTP API exposes customer MVP routes.
 - Table permissions are granted only to the API Lambda.
 
-## PR 10: Cognito Hosted UI Infrastructure Wiring
+## PR 11: Cognito Hosted UI Infrastructure Wiring
 
 Goal: provision Cognito User Pool, Google IdP, and app client settings with AWS CDK.
 
@@ -227,7 +250,7 @@ Files to update/create:
 - `apps/customer-web/src/pages/AuthCallbackPage.tsx`
 - `docs/auth.md`
 
-## PR 11: Subscription and Redemption API
+## PR 12: Subscription and Redemption API
 
 Goal: add customer profile, membership lookup, and redemption APIs with testable service logic.
 
@@ -238,7 +261,7 @@ Files to create:
 - `services/api/src/modules/redemptions/**`
 - `services/api/src/repositories/**`
 
-## PR 12: AWS CDK Deployment Hardening
+## PR 13: AWS CDK Deployment Hardening
 
 Goal: add deployable AWS infrastructure for Cognito, API Gateway, Lambda, and DynamoDB.
 
@@ -251,7 +274,7 @@ Files to create:
 - `infra/cdk/lib/constructs/api.construct.ts`
 - `infra/cdk/lib/constructs/database.construct.ts`
 
-## PR 13: Admin Manual Activation
+## PR 14: Admin Manual Activation
 
 Goal: add admin web and APIs for cafe setup, plan setup, and manual membership activation.
 

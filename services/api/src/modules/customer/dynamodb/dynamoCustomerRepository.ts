@@ -28,6 +28,62 @@ export const createDynamoCustomerRepository = ({
   requireTableName(tableName);
 
   return {
+    async commitRedemption(currentMembership, nextMembership, redemption) {
+      const membershipKey = customerKeys.membership(currentMembership.customerId, currentMembership.membershipId);
+      const redemptionKey = customerKeys.redemption(currentMembership.customerId, redemption.redemptionId);
+      const membershipGsi = gsiKeys.cafeMembership(nextMembership.cafeId, nextMembership.membershipId);
+      const redemptionGsi = gsiKeys.cafeRedemption(redemption.cafeId, redemption.redeemedAt, redemption.redemptionId);
+
+      await client.send(
+        new TransactWriteCommand({
+          TransactItems: [
+            {
+              Update: {
+                ConditionExpression:
+                  "attribute_exists(PK) AND attribute_exists(SK) AND #remainingCoffees = :expectedRemainingCoffees AND #status = :activeStatus",
+                ExpressionAttributeNames: {
+                  "#expiresAt": "expiresAt",
+                  "#gsi1pk": "gsi1pk",
+                  "#gsi1sk": "gsi1sk",
+                  "#remainingCoffees": "remainingCoffees",
+                  "#status": "status",
+                },
+                ExpressionAttributeValues: {
+                  ":activeStatus": "active",
+                  ":expectedRemainingCoffees": currentMembership.remainingCoffees,
+                  ":expiresAt": nextMembership.expiresAt,
+                  ":gsi1pk": membershipGsi.gsi1pk,
+                  ":gsi1sk": membershipGsi.gsi1sk,
+                  ":nextRemainingCoffees": nextMembership.remainingCoffees,
+                },
+                Key: {
+                  PK: membershipKey.pk,
+                  SK: membershipKey.sk,
+                },
+                TableName: tableName,
+                UpdateExpression:
+                  "SET #remainingCoffees = :nextRemainingCoffees, #expiresAt = :expiresAt, #gsi1pk = :gsi1pk, #gsi1sk = :gsi1sk",
+              },
+            },
+            {
+              Put: {
+                ConditionExpression: "attribute_not_exists(PK) AND attribute_not_exists(SK)",
+                Item: {
+                  ...redemption,
+                  PK: redemptionKey.pk,
+                  SK: redemptionKey.sk,
+                  customerId: currentMembership.customerId,
+                  entityType: "Redemption",
+                  ...redemptionGsi,
+                },
+                TableName: tableName,
+              },
+            },
+          ],
+        }),
+      );
+    },
+
     async findCafeBySlug(slug) {
       const key = customerKeys.cafeSlugLookup(slug);
       const response = await client.send(
@@ -110,13 +166,6 @@ export const createDynamoCustomerRepository = ({
       return (response.Items ?? []) as StoredRedemption[];
     },
 
-    async saveMembership() {
-      throw new Error("DynamoDB membership updates will be enabled with transactional persistence in the next slice.");
-    },
-
-    async saveRedemption() {
-      throw new Error("DynamoDB redemption writes will be enabled with transactional persistence in the next slice.");
-    },
   };
 };
 
@@ -130,26 +179,4 @@ export const toMembershipItem = (membership: Membership): StoredMembership & Rec
     entityType: "Membership",
     ...gsi,
   };
-};
-
-export const toRedemptionTransactWrite = (redemption: Redemption, customerId: string, tableName: string) => {
-  const key = customerKeys.redemption(customerId, redemption.redemptionId);
-  const gsi = gsiKeys.cafeRedemption(redemption.cafeId, redemption.redeemedAt, redemption.redemptionId);
-  return new TransactWriteCommand({
-    TransactItems: [
-      {
-        Put: {
-          Item: {
-            ...redemption,
-            PK: key.pk,
-            SK: key.sk,
-            customerId,
-            entityType: "Redemption",
-            ...gsi,
-          },
-          TableName: tableName,
-        },
-      },
-    ],
-  });
 };
