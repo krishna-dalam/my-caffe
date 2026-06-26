@@ -194,7 +194,28 @@ Acceptance:
 - DynamoDB table name is validated before adapter use.
 - Single-table key shapes are covered by tests and documented.
 
-## PR 9: Cognito Hosted UI Infrastructure Wiring
+## PR 9: AWS CDK Foundation
+
+Status: implemented in this working tree.
+
+Goal: add a synthable AWS CDK foundation for the customer MVP.
+
+Files:
+
+- `infra/cdk/**`
+- `docs/infrastructure.md`
+- `package.json`
+
+Acceptance:
+
+- CDK app synthesizes after API build.
+- DynamoDB table includes the documented primary key and GSI.
+- Cognito User Pool and public web client are created.
+- Lambda uses the built API handler asset.
+- HTTP API exposes customer MVP routes.
+- Table permissions are granted only to the API Lambda.
+
+## PR 10: Cognito Hosted UI Infrastructure Wiring
 
 Goal: provision Cognito User Pool, Google IdP, and app client settings with AWS CDK.
 
@@ -206,7 +227,7 @@ Files to update/create:
 - `apps/customer-web/src/pages/AuthCallbackPage.tsx`
 - `docs/auth.md`
 
-## PR 10: Subscription and Redemption API
+## PR 11: Subscription and Redemption API
 
 Goal: add customer profile, membership lookup, and redemption APIs with testable service logic.
 
@@ -217,7 +238,7 @@ Files to create:
 - `services/api/src/modules/redemptions/**`
 - `services/api/src/repositories/**`
 
-## PR 11: AWS CDK Foundation
+## PR 12: AWS CDK Deployment Hardening
 
 Goal: add deployable AWS infrastructure for Cognito, API Gateway, Lambda, and DynamoDB.
 
@@ -230,7 +251,7 @@ Files to create:
 - `infra/cdk/lib/constructs/api.construct.ts`
 - `infra/cdk/lib/constructs/database.construct.ts`
 
-## PR 12: Admin Manual Activation
+## PR 13: Admin Manual Activation
 
 Goal: add admin web and APIs for cafe setup, plan setup, and manual membership activation.
 

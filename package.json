@@ -7,6 +7,7 @@
     "build": "pnpm -r build",
     "dev:api": "pnpm --filter @my-caffe/api dev",
     "dev:customer": "pnpm --filter @my-caffe/customer-web dev",
+    "infra:synth": "pnpm --filter @my-caffe/infra-cdk synth",
     "lint": "pnpm -r lint",
     "test": "pnpm -r test",
     "typecheck": "pnpm -r typecheck"
