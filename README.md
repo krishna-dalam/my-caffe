@@ -37,6 +37,16 @@ pnpm dev:api
 curl http://localhost:3000/v1/health
 ```
 
+To point the customer app at the local API instead of the mock API, create `apps/customer-web/.env.local`:
+
+```sh
+VITE_USE_MOCK_API=false
+VITE_API_BASE_URL="http://localhost:3000/v1"
+VITE_DEV_ACCESS_TOKEN="demo-token"
+```
+
+Then run `pnpm dev:api` and `pnpm dev:customer` in separate terminals.
+
 ## Current Implementation Slice
 
 The customer web app defaults to a typed mock API so the end-to-end customer flow is usable before AWS infrastructure exists. The backend API skeleton exposes matching customer routes with in-memory demo data and a Lambda-compatible handler.

@@ -11,6 +11,7 @@ import {
   startGoogleLogin,
 } from "../auth/cognito";
 import { env } from "../config/env";
+import { chooseRequestAccessToken } from "./authToken";
 import { mockCoffeeApi } from "./mockCoffeeApi";
 
 export interface CoffeeApi {
@@ -25,7 +26,10 @@ export interface CoffeeApi {
 }
 
 const jsonRequest = async <T>(path: string, init?: RequestInit): Promise<T> => {
-  const accessToken = getAccessToken();
+  const accessToken = chooseRequestAccessToken({
+    devAccessToken: env.devAccessToken,
+    hostedUiAccessToken: getAccessToken(),
+  });
   const response = await fetch(`${env.apiBaseUrl}${path}`, {
     ...init,
     headers: {
@@ -51,13 +55,22 @@ const realCoffeeApi: CoffeeApi = {
   getCafeLanding: (slug) => jsonRequest<CafeLandingView>(`/cafes/${slug}`),
   getCurrentCustomer: () => jsonRequest<Customer | null>("/me"),
   getRedemptions: (cafeId) => jsonRequest<Redemption[]>(`/me/redemptions?cafeId=${encodeURIComponent(cafeId)}`),
-  completeLoginRedirect: () =>
-    completeHostedUiCallback({
+  completeLoginRedirect: () => {
+    if (env.devAccessToken) {
+      return Promise.resolve();
+    }
+
+    return completeHostedUiCallback({
       clientId: env.cognitoClientId,
       domain: env.cognitoDomain,
       redirectUri: env.cognitoRedirectUri,
-    }),
+    });
+  },
   loginWithGoogle: async () => {
+    if (env.devAccessToken) {
+      return jsonRequest<Customer>("/me");
+    }
+
     await startGoogleLogin({
       clientId: env.cognitoClientId,
       domain: env.cognitoDomain,
@@ -66,6 +79,10 @@ const realCoffeeApi: CoffeeApi = {
     return new Promise<Customer>(() => undefined);
   },
   logout: () => {
+    if (env.devAccessToken) {
+      return Promise.resolve();
+    }
+
     logoutFromHostedUi({
       clientId: env.cognitoClientId,
       domain: env.cognitoDomain,

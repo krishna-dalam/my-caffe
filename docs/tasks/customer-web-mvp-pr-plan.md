@@ -127,7 +127,31 @@ Acceptance:
 - `GET /v1/me/redemptions` returns redemption history.
 - API business flow is covered by tests.
 
-## PR 6: Cognito Hosted UI Infrastructure Wiring
+## PR 6: Local Customer Web to API Integration
+
+Status: implemented in this working tree.
+
+Goal: let the customer web app use the local API skeleton in real API mode before Cognito infrastructure is available.
+
+Files:
+
+- `apps/customer-web/.env.example`
+- `apps/customer-web/src/api/authToken.ts`
+- `apps/customer-web/src/api/authToken.test.ts`
+- `apps/customer-web/src/api/coffeeApi.ts`
+- `apps/customer-web/src/config/env.ts`
+- `README.md`
+- `docs/auth.md`
+
+Acceptance:
+
+- Customer web can run with `VITE_USE_MOCK_API=false`.
+- Local API requests include `Authorization: Bearer <VITE_DEV_ACCESS_TOKEN>` when provided.
+- Hosted UI tokens still take precedence over local development tokens.
+- Mock mode remains the default development path.
+- Local API integration setup is documented.
+
+## PR 7: Cognito Hosted UI Infrastructure Wiring
 
 Goal: provision Cognito User Pool, Google IdP, and app client settings with AWS CDK.
 
@@ -139,7 +163,7 @@ Files to update/create:
 - `apps/customer-web/src/pages/AuthCallbackPage.tsx`
 - `docs/auth.md`
 
-## PR 7: Subscription and Redemption API
+## PR 8: Subscription and Redemption API
 
 Goal: add customer profile, membership lookup, and redemption APIs with testable service logic.
 
@@ -150,7 +174,7 @@ Files to create:
 - `services/api/src/modules/redemptions/**`
 - `services/api/src/repositories/**`
 
-## PR 8: AWS CDK Foundation
+## PR 9: AWS CDK Foundation
 
 Goal: add deployable AWS infrastructure for Cognito, API Gateway, Lambda, and DynamoDB.
 
@@ -163,7 +187,7 @@ Files to create:
 - `infra/cdk/lib/constructs/api.construct.ts`
 - `infra/cdk/lib/constructs/database.construct.ts`
 
-## PR 9: Admin Manual Activation
+## PR 10: Admin Manual Activation
 
 Goal: add admin web and APIs for cafe setup, plan setup, and manual membership activation.
 

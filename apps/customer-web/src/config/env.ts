@@ -5,6 +5,7 @@ interface CustomerWebEnv {
   cognitoDomain: string;
   cognitoClientId: string;
   cognitoRedirectUri: string;
+  devAccessToken: string;
 }
 
 const readEnv = (key: string): string | undefined => {
@@ -19,4 +20,5 @@ export const env: CustomerWebEnv = {
   cognitoDomain: readEnv("VITE_COGNITO_DOMAIN") ?? "",
   cognitoClientId: readEnv("VITE_COGNITO_CLIENT_ID") ?? "",
   cognitoRedirectUri: readEnv("VITE_COGNITO_REDIRECT_URI") ?? window.location.origin + "/auth/callback",
+  devAccessToken: readEnv("VITE_DEV_ACCESS_TOKEN") ?? "",
 };

@@ -33,3 +33,22 @@ The app uses Authorization Code with PKCE:
 - Logout clears local tokens and redirects through Cognito logout when configured.
 
 Do not commit Google client secrets, Cognito secrets, or environment-specific URLs.
+
+## Local API Integration Mode
+
+Before Cognito infrastructure exists, you can run the customer web app against the local API skeleton using a non-secret development token:
+
+```sh
+VITE_USE_MOCK_API=false
+VITE_API_BASE_URL="http://localhost:3000/v1"
+VITE_DEV_ACCESS_TOKEN="demo-token"
+```
+
+Run both services:
+
+```sh
+pnpm dev:api
+pnpm dev:customer
+```
+
+The local API currently accepts any non-empty bearer token. This is only for local integration testing and must be replaced by Cognito JWT verification before deployment.
