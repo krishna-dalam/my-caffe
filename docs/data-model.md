@@ -32,6 +32,8 @@ CAFE_SLUG#{slug}            PROFILE
 CAFE#{cafeId}               PROFILE
 ```
 
+For deployed authenticated customer routes, `customerId` is the Cognito `sub` claim from the API Gateway JWT authorizer. Local memory mode uses `customer_demo_001` when called with the development bearer token.
+
 GSI examples:
 
 ```txt

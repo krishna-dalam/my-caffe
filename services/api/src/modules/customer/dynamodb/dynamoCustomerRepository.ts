@@ -10,10 +10,9 @@ type StoredRedemption = Redemption & { customerId: string; entityType: "Redempti
 
 interface DynamoCustomerRepositoryOptions {
   client: DynamoDBDocumentClient;
+  customerId: string;
   tableName: string;
 }
-
-const demoCustomerId = "customer_demo_001";
 
 const requireTableName = (tableName: string): void => {
   if (!tableName) {
@@ -23,6 +22,7 @@ const requireTableName = (tableName: string): void => {
 
 export const createDynamoCustomerRepository = ({
   client,
+  customerId,
   tableName,
 }: DynamoCustomerRepositoryOptions): CustomerRepository => {
   requireTableName(tableName);
@@ -100,7 +100,7 @@ export const createDynamoCustomerRepository = ({
     },
 
     async getCurrentCustomer() {
-      const key = customerKeys.customerProfile(demoCustomerId);
+      const key = customerKeys.customerProfile(customerId);
       const response = await client.send(
         new GetCommand({
           Key: {
@@ -129,7 +129,7 @@ export const createDynamoCustomerRepository = ({
           },
           ExpressionAttributeValues: {
             ":cafeId": cafeId,
-            ":pk": `CUSTOMER#${demoCustomerId}`,
+            ":pk": `CUSTOMER#${customerId}`,
             ":skPrefix": "MEMBERSHIP#",
             ":status": "active",
           },
@@ -153,7 +153,7 @@ export const createDynamoCustomerRepository = ({
           },
           ExpressionAttributeValues: {
             ":cafeId": cafeId,
-            ":pk": `CUSTOMER#${demoCustomerId}`,
+            ":pk": `CUSTOMER#${customerId}`,
             ":skPrefix": "REDEMPTION#",
           },
           FilterExpression: "#cafeId = :cafeId",

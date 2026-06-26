@@ -4,13 +4,18 @@ import type { CustomerRepository } from "./customerRepository.js";
 import { createDynamoCustomerRepository } from "./dynamodb/dynamoCustomerRepository.js";
 import { createMemoryCustomerRepository } from "./memoryCustomerRepository.js";
 
-export const createCustomerRepository = (): CustomerRepository => {
+export interface CustomerRepositoryOptions {
+  customerId: string;
+}
+
+export const createCustomerRepository = ({ customerId }: CustomerRepositoryOptions): CustomerRepository => {
   if (env.customerRepository === "dynamodb") {
     return createDynamoCustomerRepository({
       client: createDynamoDocumentClient(),
+      customerId,
       tableName: env.tableName,
     });
   }
 
-  return createMemoryCustomerRepository();
+  return createMemoryCustomerRepository({ customerId });
 };

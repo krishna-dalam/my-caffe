@@ -304,7 +304,33 @@ Acceptance:
 - Customer web app client supports Google when provider config is present.
 - Docs include Google callback URL and secret storage instructions.
 
-## PR 14: Cognito Hosted UI Environment Wiring
+## PR 14: Cognito Customer Identity Mapping
+
+Status: implemented in this working tree.
+
+Goal: use authenticated Cognito JWT claims to scope customer API data instead of relying on a hardcoded demo customer ID.
+
+Files:
+
+- `services/api/src/http/types.ts`
+- `services/api/src/http/router.ts`
+- `services/api/src/http/router.test.ts`
+- `services/api/src/modules/customer/repositoryFactory.ts`
+- `services/api/src/modules/customer/memoryCustomerRepository.ts`
+- `services/api/src/modules/customer/dynamodb/dynamoCustomerRepository.ts`
+- `services/api/src/modules/customer/dynamodb/dynamoCustomerRepository.test.ts`
+- `docs/auth.md`
+- `docs/data-model.md`
+
+Acceptance:
+
+- API Gateway JWT authorizer claims are represented in API event types.
+- Protected customer routes use Cognito `sub` as the backend `customerId`.
+- DynamoDB profile, membership, and redemption queries are scoped to the authenticated customer.
+- Local development bearer token still maps to `customer_demo_001`.
+- Tests prove two Cognito subjects do not share redemption history.
+
+## PR 15: Cognito Hosted UI Environment Wiring
 
 Goal: provision Cognito User Pool, Google IdP, and app client settings with AWS CDK.
 
@@ -316,7 +342,7 @@ Files to update/create:
 - `apps/customer-web/src/pages/AuthCallbackPage.tsx`
 - `docs/auth.md`
 
-## PR 15: Subscription and Redemption API
+## PR 16: Subscription and Redemption API
 
 Goal: add customer profile, membership lookup, and redemption APIs with testable service logic.
 
@@ -327,7 +353,7 @@ Files to create:
 - `services/api/src/modules/redemptions/**`
 - `services/api/src/repositories/**`
 
-## PR 16: AWS CDK Deployment Hardening
+## PR 17: AWS CDK Deployment Hardening
 
 Goal: add deployable AWS infrastructure for Cognito, API Gateway, Lambda, and DynamoDB.
 
@@ -340,7 +366,7 @@ Files to create:
 - `infra/cdk/lib/constructs/api.construct.ts`
 - `infra/cdk/lib/constructs/database.construct.ts`
 
-## PR 17: Admin Manual Activation
+## PR 18: Admin Manual Activation
 
 Goal: add admin web and APIs for cafe setup, plan setup, and manual membership activation.
 

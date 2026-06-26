@@ -4,12 +4,14 @@ import type { ApiGatewayHttpEvent } from "./types.js";
 
 const makeEvent = ({
   body,
+  claims,
   headers,
   method,
   path,
   query,
 }: {
   body?: unknown;
+  claims?: Record<string, string>;
   headers?: Record<string, string>;
   method: string;
   path: string;
@@ -20,6 +22,7 @@ const makeEvent = ({
   queryStringParameters: query ?? null,
   rawPath: path,
   requestContext: {
+    authorizer: claims ? { jwt: { claims } } : undefined,
     http: {
       method,
       path,
@@ -83,6 +86,49 @@ describe("customer API router", () => {
       redemption: { verificationCode: expect.stringMatching(/^\d{4}$/) },
     });
     expect(parseBody<{ data: unknown[] }>(historyResponse.body).data).toHaveLength(1);
+  });
+
+  it("scopes customer state by Cognito subject claim", async () => {
+    const router = createRouter();
+
+    const redeemForCustomerA = await router.handle(
+      makeEvent({
+        body: { cafeId: "cafe_demo_001" },
+        claims: { email: "customer-a@example.com", name: "Customer A", sub: "cognito_customer_a" },
+        method: "POST",
+        path: "/v1/redemptions",
+      }),
+    );
+    const customerAHistory = await router.handle(
+      makeEvent({
+        claims: { email: "customer-a@example.com", name: "Customer A", sub: "cognito_customer_a" },
+        method: "GET",
+        path: "/v1/me/redemptions",
+        query: { cafeId: "cafe_demo_001" },
+      }),
+    );
+    const customerBHistory = await router.handle(
+      makeEvent({
+        claims: { email: "customer-b@example.com", name: "Customer B", sub: "cognito_customer_b" },
+        method: "GET",
+        path: "/v1/me/redemptions",
+        query: { cafeId: "cafe_demo_001" },
+      }),
+    );
+    const customerBProfile = await router.handle(
+      makeEvent({
+        claims: { email: "customer-b@example.com", name: "Customer B", sub: "cognito_customer_b" },
+        method: "GET",
+        path: "/v1/me",
+      }),
+    );
+
+    expect(redeemForCustomerA.statusCode).toBe(201);
+    expect(parseBody<{ data: unknown[] }>(customerAHistory.body).data).toHaveLength(1);
+    expect(parseBody<{ data: unknown[] }>(customerBHistory.body).data).toHaveLength(0);
+    expect(parseBody<{ data: { customerId: string } }>(customerBProfile.body).data.customerId).toBe(
+      "cognito_customer_b",
+    );
   });
 
   it("blocks redemption after coffee count reaches zero", async () => {

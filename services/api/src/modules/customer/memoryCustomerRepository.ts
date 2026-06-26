@@ -15,9 +15,22 @@ const demoCustomer: Customer = {
   email: "aarav@example.com",
 };
 
-const makeMembership = (): Membership => ({
+interface MemoryCustomerRepositoryOptions {
+  customerId?: string;
+}
+
+const makeCustomer = (customerId: string): Customer =>
+  customerId === demoCustomer.customerId
+    ? demoCustomer
+    : {
+        customerId,
+        displayName: "Coffee Member",
+        email: `${customerId}@example.test`,
+      };
+
+const makeMembership = (customerId: string): Membership => ({
   membershipId: "membership_demo_001",
-  customerId: demoCustomer.customerId,
+  customerId,
   cafeId: demoCafe.cafeId,
   planId: "plan_demo_001",
   planName: "Monthly 8 Coffee Pass",
@@ -27,8 +40,11 @@ const makeMembership = (): Membership => ({
   expiresAt: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString(),
 });
 
-export const createMemoryCustomerRepository = (): CustomerRepository => {
-  let membership = makeMembership();
+export const createMemoryCustomerRepository = ({
+  customerId = demoCustomer.customerId,
+}: MemoryCustomerRepositoryOptions = {}): CustomerRepository => {
+  const customer = makeCustomer(customerId);
+  let membership = makeMembership(customer.customerId);
   let redemptions: Redemption[] = [];
 
   return {
@@ -42,7 +58,7 @@ export const createMemoryCustomerRepository = (): CustomerRepository => {
     },
 
     async getCurrentCustomer() {
-      return demoCustomer;
+      return customer;
     },
 
     async getMembershipForCafe(cafeId) {

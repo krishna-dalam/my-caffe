@@ -6,6 +6,7 @@ describe("dynamoCustomerRepository", () => {
     expect(() =>
       createDynamoCustomerRepository({
         client: { send: async () => ({}) },
+        customerId: "customer_001",
         tableName: "",
       }),
     ).toThrow("COFFEE_TABLE_NAME is required");
@@ -42,6 +43,7 @@ describe("dynamoCustomerRepository", () => {
           return {};
         },
       },
+      customerId: "customer_001",
       tableName: "CoffeeTable",
     });
 
