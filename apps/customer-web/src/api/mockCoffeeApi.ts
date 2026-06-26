@@ -30,6 +30,19 @@ interface MockSession {
   redemptions: Redemption[];
 }
 
+interface MockStorage {
+  getItem(key: string): string | null;
+  removeItem(key: string): void;
+  setItem(key: string, value: string): void;
+}
+
+interface MockCoffeeApiOptions {
+  codeGenerator?: () => string;
+  delayMs?: number;
+  idGenerator?: () => string;
+  storage: MockStorage;
+}
+
 const initialMembership = (): Membership => ({
   membershipId: "membership_demo_001",
   customerId: demoCustomer.customerId,
@@ -42,8 +55,8 @@ const initialMembership = (): Membership => ({
   expiresAt: new Date(Date.now() + 21 * 24 * 60 * 60 * 1000).toISOString(),
 });
 
-const readSession = (): MockSession => {
-  const raw = window.sessionStorage.getItem(sessionKey);
+const readSession = (storage: MockStorage): MockSession => {
+  const raw = storage.getItem(sessionKey);
   if (!raw) {
     return {
       customer: null,
@@ -55,12 +68,12 @@ const readSession = (): MockSession => {
   return JSON.parse(raw) as MockSession;
 };
 
-const writeSession = (session: MockSession): void => {
-  window.sessionStorage.setItem(sessionKey, JSON.stringify(session));
+const writeSession = (storage: MockStorage, session: MockSession): void => {
+  storage.setItem(sessionKey, JSON.stringify(session));
 };
 
-const delay = async (): Promise<void> => {
-  await new Promise((resolve) => window.setTimeout(resolve, 250));
+const delay = async (delayMs: number): Promise<void> => {
+  await new Promise((resolve) => globalThis.setTimeout(resolve, delayMs));
 };
 
 const makeVerificationCode = (): string => {
@@ -68,15 +81,28 @@ const makeVerificationCode = (): string => {
   return value.toString();
 };
 
-export const mockCoffeeApi: CoffeeApi = {
+const makeRedemptionId = (): string => {
+  if (globalThis.crypto?.randomUUID) {
+    return globalThis.crypto.randomUUID();
+  }
+
+  return `redemption_${Date.now()}`;
+};
+
+export const createMockCoffeeApi = ({
+  codeGenerator = makeVerificationCode,
+  delayMs = 250,
+  idGenerator = makeRedemptionId,
+  storage,
+}: MockCoffeeApiOptions): CoffeeApi => ({
   async getCafeLanding(slug: string): Promise<CafeLandingView> {
-    await delay();
+    await delay(delayMs);
 
     if (slug !== demoCafe.slug) {
       throw new Error("Cafe not found.");
     }
 
-    const session = readSession();
+    const session = readSession(storage);
     return {
       cafe: demoCafe,
       activeMembership: session.customer ? session.membership : null,
@@ -84,44 +110,44 @@ export const mockCoffeeApi: CoffeeApi = {
   },
 
   async getCurrentCustomer(): Promise<Customer | null> {
-    await delay();
-    return readSession().customer;
+    await delay(delayMs);
+    return readSession(storage).customer;
   },
 
   async getRedemptions(cafeId: string): Promise<Redemption[]> {
-    await delay();
-    const session = readSession();
+    await delay(delayMs);
+    const session = readSession(storage);
     return session.redemptions.filter((redemption) => redemption.cafeId === cafeId);
   },
 
   async loginWithGoogle(): Promise<Customer> {
-    await delay();
-    const session = readSession();
+    await delay(delayMs);
+    const session = readSession(storage);
     const nextSession = {
       ...session,
       customer: demoCustomer,
     };
-    writeSession(nextSession);
+    writeSession(storage, nextSession);
     return demoCustomer;
   },
 
   async logout(): Promise<void> {
-    await delay();
-    const session = readSession();
-    writeSession({
+    await delay(delayMs);
+    const session = readSession(storage);
+    writeSession(storage, {
       ...session,
       customer: null,
     });
   },
 
   async resetDemoData(): Promise<void> {
-    await delay();
-    window.sessionStorage.removeItem(sessionKey);
+    await delay(delayMs);
+    storage.removeItem(sessionKey);
   },
 
   async redeemCoffee(cafeId: string): Promise<RedeemCoffeeResponse> {
-    await delay();
-    const session = readSession();
+    await delay(delayMs);
+    const session = readSession(storage);
 
     if (!session.customer) {
       throw new Error("Login is required before redeeming coffee.");
@@ -141,15 +167,15 @@ export const mockCoffeeApi: CoffeeApi = {
     };
 
     const redemption: Redemption = {
-      redemptionId: crypto.randomUUID(),
+      redemptionId: idGenerator(),
       membershipId: nextMembership.membershipId,
       cafeId,
-      verificationCode: makeVerificationCode(),
+      verificationCode: codeGenerator(),
       redeemedAt: new Date().toISOString(),
       remainingCoffeesAfterRedeem: nextMembership.remainingCoffees,
     };
 
-    writeSession({
+    writeSession(storage, {
       ...session,
       membership: nextMembership,
       redemptions: [redemption, ...session.redemptions],
@@ -160,4 +186,12 @@ export const mockCoffeeApi: CoffeeApi = {
       membership: nextMembership,
     };
   },
-};
+});
+
+export const mockCoffeeApi: CoffeeApi = createMockCoffeeApi({
+  storage: {
+    getItem: (key) => window.sessionStorage.getItem(key),
+    removeItem: (key) => window.sessionStorage.removeItem(key),
+    setItem: (key, value) => window.sessionStorage.setItem(key, value),
+  },
+});

@@ -55,7 +55,29 @@ Acceptance:
 - Redemption history is visible after coffee redemption and after page refresh.
 - Coffee count still decreases by one per redemption.
 
-## PR 3: Backend API Skeleton
+## PR 3: Customer Flow Regression Tests
+
+Status: implemented in this working tree.
+
+Goal: protect the core customer redemption behavior with automated tests before replacing the mock API with the real backend.
+
+Files:
+
+- `apps/customer-web/package.json`
+- `apps/customer-web/src/api/mockCoffeeApi.ts`
+- `apps/customer-web/src/api/mockCoffeeApi.test.ts`
+- `pnpm-lock.yaml`
+
+Acceptance:
+
+- Tests prove login is required before membership is shown.
+- Tests prove one redemption returns a 4-digit verification code and decreases count.
+- Tests prove redemption history is recorded.
+- Tests prove redemption is blocked when signed out.
+- Tests prove redemption stops when coffee count reaches zero.
+- Tests prove demo data can be reset.
+
+## PR 4: Backend API Skeleton
 
 Goal: add `services/api` with Lambda-compatible routing, health check, typed config, consistent API responses, and tests.
 
@@ -70,7 +92,7 @@ Files to create:
 - `services/api/src/modules/health/health.handler.ts`
 - `services/api/src/modules/health/health.test.ts`
 
-## PR 4: Cognito Hosted UI Integration
+## PR 5: Cognito Hosted UI Integration
 
 Goal: replace mock login with AWS Cognito Google Hosted UI.
 
@@ -82,7 +104,7 @@ Files to update/create:
 - `apps/customer-web/src/pages/AuthCallbackPage.tsx`
 - `docs/auth.md`
 
-## PR 5: Subscription and Redemption API
+## PR 6: Subscription and Redemption API
 
 Goal: add customer profile, membership lookup, and redemption APIs with testable service logic.
 
@@ -93,7 +115,7 @@ Files to create:
 - `services/api/src/modules/redemptions/**`
 - `services/api/src/repositories/**`
 
-## PR 6: AWS CDK Foundation
+## PR 7: AWS CDK Foundation
 
 Goal: add deployable AWS infrastructure for Cognito, API Gateway, Lambda, and DynamoDB.
 
@@ -106,7 +128,7 @@ Files to create:
 - `infra/cdk/lib/constructs/api.construct.ts`
 - `infra/cdk/lib/constructs/database.construct.ts`
 
-## PR 7: Admin Manual Activation
+## PR 8: Admin Manual Activation
 
 Goal: add admin web and APIs for cafe setup, plan setup, and manual membership activation.
 
