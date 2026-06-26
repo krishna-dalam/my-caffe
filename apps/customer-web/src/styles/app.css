@@ -69,6 +69,24 @@ button {
   padding: 8px 14px;
 }
 
+.account-actions {
+  align-items: center;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.text-button {
+  background: transparent;
+  border: 0;
+  color: #176b52;
+  cursor: pointer;
+  font-weight: 800;
+  min-height: 36px;
+  padding: 0;
+}
+
 .hero-band {
   align-items: stretch;
   background:
@@ -126,7 +144,8 @@ button {
 .status-panel,
 .error-banner,
 .detail-panel,
-.redeem-panel {
+.redeem-panel,
+.history-panel {
   background: #fffaf2;
   border: 1px solid #e9dcc8;
   border-radius: 8px;
@@ -187,7 +206,8 @@ button {
 }
 
 .detail-panel,
-.redeem-panel {
+.redeem-panel,
+.history-panel {
   padding: 22px;
 }
 
@@ -229,6 +249,53 @@ button {
   width: 100%;
 }
 
+.history-panel {
+  margin-top: 18px;
+}
+
+.history-panel h2 {
+  line-height: 1.1;
+  margin: 0;
+}
+
+.history-panel ol {
+  display: grid;
+  gap: 10px;
+  list-style: none;
+  margin: 20px 0 0;
+  padding: 0;
+}
+
+.history-panel li {
+  align-items: center;
+  border-top: 1px solid #eadcc8;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 84px minmax(0, 1fr);
+  padding-top: 10px;
+}
+
+.history-panel li span {
+  background: #1e1a15;
+  border-radius: 8px;
+  color: #f7d58f;
+  display: inline-block;
+  font-size: 1.35rem;
+  font-weight: 900;
+  padding: 8px 10px;
+  text-align: center;
+}
+
+.history-panel strong,
+.history-panel p {
+  margin: 0;
+}
+
+.muted-copy {
+  color: #6a5a48;
+  margin: 14px 0 0;
+}
+
 @media (max-width: 760px) {
   .page-shell {
     padding: 16px;
@@ -237,6 +304,10 @@ button {
   .top-bar {
     align-items: flex-start;
     flex-direction: column;
+  }
+
+  .account-actions {
+    justify-content: flex-start;
   }
 
   .hero-band,

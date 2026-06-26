@@ -88,6 +88,12 @@ export const mockCoffeeApi: CoffeeApi = {
     return readSession().customer;
   },
 
+  async getRedemptions(cafeId: string): Promise<Redemption[]> {
+    await delay();
+    const session = readSession();
+    return session.redemptions.filter((redemption) => redemption.cafeId === cafeId);
+  },
+
   async loginWithGoogle(): Promise<Customer> {
     await delay();
     const session = readSession();
@@ -106,6 +112,11 @@ export const mockCoffeeApi: CoffeeApi = {
       ...session,
       customer: null,
     });
+  },
+
+  async resetDemoData(): Promise<void> {
+    await delay();
+    window.sessionStorage.removeItem(sessionKey);
   },
 
   async redeemCoffee(cafeId: string): Promise<RedeemCoffeeResponse> {

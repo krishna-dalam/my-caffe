@@ -2,6 +2,7 @@ import type {
   CafeLandingView,
   Customer,
   RedeemCoffeeResponse,
+  Redemption,
 } from "@my-caffe/shared";
 import { env } from "../config/env";
 import { mockCoffeeApi } from "./mockCoffeeApi";
@@ -9,9 +10,11 @@ import { mockCoffeeApi } from "./mockCoffeeApi";
 export interface CoffeeApi {
   getCafeLanding(slug: string): Promise<CafeLandingView>;
   getCurrentCustomer(): Promise<Customer | null>;
+  getRedemptions(cafeId: string): Promise<Redemption[]>;
   loginWithGoogle(): Promise<Customer>;
   logout(): Promise<void>;
   redeemCoffee(cafeId: string): Promise<RedeemCoffeeResponse>;
+  resetDemoData(): Promise<void>;
 }
 
 const jsonRequest = async <T>(path: string, init?: RequestInit): Promise<T> => {
@@ -33,6 +36,7 @@ const jsonRequest = async <T>(path: string, init?: RequestInit): Promise<T> => {
 const realCoffeeApi: CoffeeApi = {
   getCafeLanding: (slug) => jsonRequest<CafeLandingView>(`/cafes/${slug}`),
   getCurrentCustomer: () => jsonRequest<Customer | null>("/me"),
+  getRedemptions: (cafeId) => jsonRequest<Redemption[]>(`/me/redemptions?cafeId=${encodeURIComponent(cafeId)}`),
   loginWithGoogle: () => {
     if (!env.cognitoDomain || !env.cognitoClientId) {
       throw new Error("Cognito Hosted UI is not configured.");
@@ -55,6 +59,7 @@ const realCoffeeApi: CoffeeApi = {
       body: JSON.stringify({ cafeId }),
       method: "POST",
     }),
+  resetDemoData: () => Promise.resolve(),
 };
 
 export const coffeeApi: CoffeeApi = env.useMockApi ? mockCoffeeApi : realCoffeeApi;

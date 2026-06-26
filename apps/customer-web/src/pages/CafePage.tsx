@@ -1,5 +1,5 @@
-import type { CafeLandingView, Customer, RedeemCoffeeResponse } from "@my-caffe/shared";
-import { useMemo, useState } from "react";
+import type { CafeLandingView, Customer, RedeemCoffeeResponse, Redemption } from "@my-caffe/shared";
+import { useEffect, useMemo, useState } from "react";
 import { coffeeApi } from "../api/coffeeApi";
 import { useAsync } from "../features/useAsync";
 
@@ -19,15 +19,33 @@ export function CafePage() {
   const cafeSlug = useMemo(() => getCafeSlug(), []);
   const cafeState = useAsync<CafeLandingView>(() => coffeeApi.getCafeLanding(cafeSlug), [cafeSlug]);
   const customerState = useAsync<Customer | null>(() => coffeeApi.getCurrentCustomer(), []);
+  const [redemptions, setRedemptions] = useState<Redemption[]>([]);
   const [latestRedemption, setLatestRedemption] = useState<RedeemCoffeeResponse | null>(null);
   const [actionError, setActionError] = useState<string | null>(null);
   const [isRedeeming, setIsRedeeming] = useState(false);
+
+  useEffect(() => {
+    const loadRedemptions = async () => {
+      if (!customerState.data || !cafeState.data?.activeMembership) {
+        setRedemptions([]);
+        return;
+      }
+
+      setRedemptions(await coffeeApi.getRedemptions(cafeState.data.cafe.cafeId));
+    };
+
+    void loadRedemptions();
+  }, [cafeState.data, customerState.data]);
 
   const login = async () => {
     setActionError(null);
     try {
       await coffeeApi.loginWithGoogle();
-      await Promise.all([customerState.reload(), cafeState.reload()]);
+      const [, nextCafe] = await Promise.all([customerState.reload(), coffeeApi.getCafeLanding(cafeSlug)]);
+      cafeState.setData(nextCafe);
+      if (nextCafe.activeMembership) {
+        setRedemptions(await coffeeApi.getRedemptions(nextCafe.cafe.cafeId));
+      }
     } catch (caught) {
       setActionError(caught instanceof Error ? caught.message : "Unable to start Google login.");
     }
@@ -44,6 +62,7 @@ export function CafePage() {
     try {
       const response = await coffeeApi.redeemCoffee(cafeState.data.cafe.cafeId);
       setLatestRedemption(response);
+      setRedemptions([response.redemption, ...redemptions]);
       cafeState.setData({
         ...cafeState.data,
         activeMembership: response.membership,
@@ -52,6 +71,32 @@ export function CafePage() {
       setActionError(caught instanceof Error ? caught.message : "Unable to redeem coffee.");
     } finally {
       setIsRedeeming(false);
+    }
+  };
+
+  const logout = async () => {
+    setActionError(null);
+    setLatestRedemption(null);
+    setRedemptions([]);
+
+    try {
+      await coffeeApi.logout();
+      await Promise.all([customerState.reload(), cafeState.reload()]);
+    } catch (caught) {
+      setActionError(caught instanceof Error ? caught.message : "Unable to sign out.");
+    }
+  };
+
+  const resetDemoData = async () => {
+    setActionError(null);
+    setLatestRedemption(null);
+    setRedemptions([]);
+
+    try {
+      await coffeeApi.resetDemoData();
+      await Promise.all([customerState.reload(), cafeState.reload()]);
+    } catch (caught) {
+      setActionError(caught instanceof Error ? caught.message : "Unable to reset demo data.");
     }
   };
 
@@ -87,7 +132,17 @@ export function CafePage() {
           <p className="eyebrow">My Caffe Pass</p>
           <h1>{cafe.name}</h1>
         </div>
-        <div className="account-pill">{customer ? customer.displayName : "Guest"}</div>
+        <div className="account-actions">
+          <div className="account-pill">{customer ? customer.displayName : "Guest"}</div>
+          {customer ? (
+            <button className="text-button" type="button" onClick={logout}>
+              Sign out
+            </button>
+          ) : null}
+          <button className="text-button" type="button" onClick={resetDemoData}>
+            Reset demo
+          </button>
+        </div>
       </header>
 
       <section className="hero-band">
@@ -120,39 +175,63 @@ export function CafePage() {
       ) : null}
 
       {customer && activeMembership ? (
-        <section className="subscription-grid">
-          <article className="detail-panel">
-            <p className="eyebrow">Active plan</p>
-            <h2>{activeMembership.planName}</h2>
-            <dl>
-              <div>
-                <dt>Status</dt>
-                <dd>{activeMembership.status}</dd>
-              </div>
-              <div>
-                <dt>Expires</dt>
-                <dd>{formatDate(activeMembership.expiresAt)}</dd>
-              </div>
-            </dl>
-          </article>
-
-          <article className="redeem-panel">
-            <p className="eyebrow">Counter verification</p>
-            {latestRedemption ? (
-              <>
-                <div className="verification-code" aria-label="Verification code">
-                  {latestRedemption.redemption.verificationCode}
+        <>
+          <section className="subscription-grid">
+            <article className="detail-panel">
+              <p className="eyebrow">Active plan</p>
+              <h2>{activeMembership.planName}</h2>
+              <dl>
+                <div>
+                  <dt>Status</dt>
+                  <dd>{activeMembership.status}</dd>
                 </div>
-                <p>Show this code to staff. Your pass now has {latestRedemption.membership.remainingCoffees} coffees left.</p>
-              </>
+                <div>
+                  <dt>Expires</dt>
+                  <dd>{formatDate(activeMembership.expiresAt)}</dd>
+                </div>
+              </dl>
+            </article>
+
+            <article className="redeem-panel">
+              <p className="eyebrow">Counter verification</p>
+              {latestRedemption ? (
+                <>
+                  <div className="verification-code" aria-label="Verification code">
+                    {latestRedemption.redemption.verificationCode}
+                  </div>
+                  <p>Show this code to staff. Your pass now has {latestRedemption.membership.remainingCoffees} coffees left.</p>
+                </>
+              ) : (
+                <p>After redemption, a 4-digit code will appear here for staff verification.</p>
+              )}
+              <button className="primary-button" type="button" disabled={!canRedeem} onClick={redeem}>
+                {isRedeeming ? "Redeeming..." : remaining > 0 ? "Redeem 1 coffee" : "No coffees remaining"}
+              </button>
+            </article>
+          </section>
+
+          <section className="history-panel">
+            <div>
+              <p className="eyebrow">Redemption history</p>
+              <h2>Recent coffees</h2>
+            </div>
+            {redemptions.length > 0 ? (
+              <ol>
+                {redemptions.map((redemption) => (
+                  <li key={redemption.redemptionId}>
+                    <span>{redemption.verificationCode}</span>
+                    <div>
+                      <strong>{formatDate(redemption.redeemedAt)}</strong>
+                      <p>{redemption.remainingCoffeesAfterRedeem} coffees left after redeeming</p>
+                    </div>
+                  </li>
+                ))}
+              </ol>
             ) : (
-              <p>After redemption, a 4-digit code will appear here for staff verification.</p>
+              <p className="muted-copy">No coffees redeemed yet for this session.</p>
             )}
-            <button className="primary-button" type="button" disabled={!canRedeem} onClick={redeem}>
-              {isRedeeming ? "Redeeming..." : remaining > 0 ? "Redeem 1 coffee" : "No coffees remaining"}
-            </button>
-          </article>
-        </section>
+          </section>
+        </>
       ) : null}
 
       {customer && !activeMembership ? (

@@ -78,3 +78,7 @@ export interface RedeemCoffeeResponse {
   redemption: Redemption;
   membership: Membership;
 }
+
+export interface RedemptionHistoryView {
+  redemptions: Redemption[];
+}
