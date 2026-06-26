@@ -77,7 +77,30 @@ Acceptance:
 - Tests prove redemption stops when coffee count reaches zero.
 - Tests prove demo data can be reset.
 
-## PR 4: Backend API Skeleton
+## PR 4: Cognito Hosted UI Client Wiring
+
+Status: implemented in this working tree.
+
+Goal: add frontend Cognito Hosted UI support behind env config while preserving the mock local development path.
+
+Files:
+
+- `apps/customer-web/src/auth/cognito.ts`
+- `apps/customer-web/src/auth/cognito.test.ts`
+- `apps/customer-web/src/api/coffeeApi.ts`
+- `apps/customer-web/src/api/mockCoffeeApi.ts`
+- `apps/customer-web/src/pages/AuthCallbackPage.tsx`
+- `docs/auth.md`
+
+Acceptance:
+
+- Real mode starts Cognito Hosted UI Google login with Authorization Code + PKCE.
+- `/auth/callback` exchanges the authorization code instead of starting login again.
+- API requests include a bearer token when a valid access token is present.
+- Logout clears local token state and uses Cognito logout when configured.
+- Mock mode remains the default local development path.
+
+## PR 5: Backend API Skeleton
 
 Goal: add `services/api` with Lambda-compatible routing, health check, typed config, consistent API responses, and tests.
 
@@ -92,9 +115,9 @@ Files to create:
 - `services/api/src/modules/health/health.handler.ts`
 - `services/api/src/modules/health/health.test.ts`
 
-## PR 5: Cognito Hosted UI Integration
+## PR 6: Cognito Hosted UI Infrastructure Wiring
 
-Goal: replace mock login with AWS Cognito Google Hosted UI.
+Goal: provision Cognito User Pool, Google IdP, and app client settings with AWS CDK.
 
 Files to update/create:
 
@@ -104,7 +127,7 @@ Files to update/create:
 - `apps/customer-web/src/pages/AuthCallbackPage.tsx`
 - `docs/auth.md`
 
-## PR 6: Subscription and Redemption API
+## PR 7: Subscription and Redemption API
 
 Goal: add customer profile, membership lookup, and redemption APIs with testable service logic.
 
@@ -115,7 +138,7 @@ Files to create:
 - `services/api/src/modules/redemptions/**`
 - `services/api/src/repositories/**`
 
-## PR 7: AWS CDK Foundation
+## PR 8: AWS CDK Foundation
 
 Goal: add deployable AWS infrastructure for Cognito, API Gateway, Lambda, and DynamoDB.
 
@@ -128,7 +151,7 @@ Files to create:
 - `infra/cdk/lib/constructs/api.construct.ts`
 - `infra/cdk/lib/constructs/database.construct.ts`
 
-## PR 8: Admin Manual Activation
+## PR 9: Admin Manual Activation
 
 Goal: add admin web and APIs for cafe setup, plan setup, and manual membership activation.
 

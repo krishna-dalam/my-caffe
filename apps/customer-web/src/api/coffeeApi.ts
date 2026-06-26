@@ -4,6 +4,12 @@ import type {
   RedeemCoffeeResponse,
   Redemption,
 } from "@my-caffe/shared";
+import {
+  completeHostedUiCallback,
+  getAccessToken,
+  logoutFromHostedUi,
+  startGoogleLogin,
+} from "../auth/cognito";
 import { env } from "../config/env";
 import { mockCoffeeApi } from "./mockCoffeeApi";
 
@@ -11,6 +17,7 @@ export interface CoffeeApi {
   getCafeLanding(slug: string): Promise<CafeLandingView>;
   getCurrentCustomer(): Promise<Customer | null>;
   getRedemptions(cafeId: string): Promise<Redemption[]>;
+  completeLoginRedirect(): Promise<void>;
   loginWithGoogle(): Promise<Customer>;
   logout(): Promise<void>;
   redeemCoffee(cafeId: string): Promise<RedeemCoffeeResponse>;
@@ -18,9 +25,11 @@ export interface CoffeeApi {
 }
 
 const jsonRequest = async <T>(path: string, init?: RequestInit): Promise<T> => {
+  const accessToken = getAccessToken();
   const response = await fetch(`${env.apiBaseUrl}${path}`, {
     ...init,
     headers: {
+      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
       "Content-Type": "application/json",
       ...init?.headers,
     },
@@ -37,23 +46,28 @@ const realCoffeeApi: CoffeeApi = {
   getCafeLanding: (slug) => jsonRequest<CafeLandingView>(`/cafes/${slug}`),
   getCurrentCustomer: () => jsonRequest<Customer | null>("/me"),
   getRedemptions: (cafeId) => jsonRequest<Redemption[]>(`/me/redemptions?cafeId=${encodeURIComponent(cafeId)}`),
-  loginWithGoogle: () => {
-    if (!env.cognitoDomain || !env.cognitoClientId) {
-      throw new Error("Cognito Hosted UI is not configured.");
-    }
-
-    const params = new URLSearchParams({
-      client_id: env.cognitoClientId,
-      identity_provider: "Google",
-      redirect_uri: env.cognitoRedirectUri,
-      response_type: "code",
-      scope: "openid email profile",
+  completeLoginRedirect: () =>
+    completeHostedUiCallback({
+      clientId: env.cognitoClientId,
+      domain: env.cognitoDomain,
+      redirectUri: env.cognitoRedirectUri,
+    }),
+  loginWithGoogle: async () => {
+    await startGoogleLogin({
+      clientId: env.cognitoClientId,
+      domain: env.cognitoDomain,
+      redirectUri: env.cognitoRedirectUri,
     });
-
-    window.location.assign(`${env.cognitoDomain}/oauth2/authorize?${params.toString()}`);
     return new Promise<Customer>(() => undefined);
   },
-  logout: () => Promise.resolve(),
+  logout: () => {
+    logoutFromHostedUi({
+      clientId: env.cognitoClientId,
+      domain: env.cognitoDomain,
+      redirectUri: env.cognitoRedirectUri,
+    });
+    return Promise.resolve();
+  },
   redeemCoffee: (cafeId) =>
     jsonRequest<RedeemCoffeeResponse>("/redemptions", {
       body: JSON.stringify({ cafeId }),

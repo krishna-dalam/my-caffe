@@ -7,7 +7,7 @@ export function AuthCallbackPage() {
   useEffect(() => {
     const completeLogin = async () => {
       try {
-        await coffeeApi.loginWithGoogle();
+        await coffeeApi.completeLoginRedirect();
         window.location.replace("/c/blue-bottle-demo");
       } catch (caught) {
         setError(caught instanceof Error ? caught.message : "Unable to complete Google login.");

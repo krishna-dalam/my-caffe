@@ -95,6 +95,15 @@ export const createMockCoffeeApi = ({
   idGenerator = makeRedemptionId,
   storage,
 }: MockCoffeeApiOptions): CoffeeApi => ({
+  async completeLoginRedirect(): Promise<void> {
+    await delay(delayMs);
+    const session = readSession(storage);
+    writeSession(storage, {
+      ...session,
+      customer: demoCustomer,
+    });
+  },
+
   async getCafeLanding(slug: string): Promise<CafeLandingView> {
     await delay(delayMs);
 
