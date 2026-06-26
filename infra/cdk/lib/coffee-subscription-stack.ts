@@ -1,8 +1,10 @@
 import * as cdk from "aws-cdk-lib";
+import * as route53 from "aws-cdk-lib/aws-route53";
 import { Construct } from "constructs";
 import { ApiConstruct } from "./constructs/api.construct.js";
 import { AuthConstruct } from "./constructs/auth.construct.js";
 import { DatabaseConstruct } from "./constructs/database.construct.js";
+import { WebsiteConstruct } from "./constructs/website.construct.js";
 import { readConfig } from "./config.js";
 
 interface CoffeeSubscriptionStackProps extends cdk.StackProps {
@@ -24,9 +26,26 @@ export class CoffeeSubscriptionStack extends cdk.Stack {
       logoutUrls: [config.allowedOrigin],
     });
 
+    const hostedZone =
+      config.hostedZoneId && config.hostedZoneName
+        ? route53.HostedZone.fromHostedZoneAttributes(this, "HostedZone", {
+            hostedZoneId: config.hostedZoneId,
+            zoneName: config.hostedZoneName,
+          })
+        : undefined;
+
     const api = new ApiConstruct(this, "Api", {
+      certificateArn: config.apiCertificateArn,
+      domainName: config.apiDomainName,
       allowedOrigin: config.allowedOrigin,
+      hostedZone,
       table: database.table,
+    });
+
+    const website = new WebsiteConstruct(this, "Website", {
+      certificateArn: config.webCertificateArn,
+      domainName: config.webDomainName,
+      hostedZone,
     });
 
     new cdk.CfnOutput(this, "CoffeeTableName", {
@@ -34,6 +53,15 @@ export class CoffeeSubscriptionStack extends cdk.Stack {
     });
     new cdk.CfnOutput(this, "CustomerApiUrl", {
       value: api.api.apiEndpoint,
+    });
+    new cdk.CfnOutput(this, "CustomerWebDistributionDomainName", {
+      value: website.distribution.distributionDomainName,
+    });
+    new cdk.CfnOutput(this, "CustomerWebDomainName", {
+      value: config.webDomainName,
+    });
+    new cdk.CfnOutput(this, "CustomerApiDomainName", {
+      value: config.apiDomainName,
     });
     new cdk.CfnOutput(this, "CustomerUserPoolId", {
       value: auth.userPool.userPoolId,

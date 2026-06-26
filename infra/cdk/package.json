@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "lint": "tsc -p tsconfig.json --noEmit",
-    "synth": "pnpm --filter @my-caffe/api build && cdk synth",
+    "synth": "pnpm --filter @my-caffe/api build && pnpm --filter @my-caffe/customer-web build && cdk synth",
     "test": "echo \"No infra tests yet\"",
     "typecheck": "tsc -p tsconfig.json --noEmit"
   },

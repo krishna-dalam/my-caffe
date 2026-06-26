@@ -1,14 +1,20 @@
 import * as cdk from "aws-cdk-lib";
 import * as apigatewayv2 from "aws-cdk-lib/aws-apigatewayv2";
 import * as integrations from "aws-cdk-lib/aws-apigatewayv2-integrations";
+import * as acm from "aws-cdk-lib/aws-certificatemanager";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as lambda from "aws-cdk-lib/aws-lambda";
+import * as route53 from "aws-cdk-lib/aws-route53";
+import * as targets from "aws-cdk-lib/aws-route53-targets";
 import { Construct } from "constructs";
 import { existsSync } from "node:fs";
 import { join } from "node:path";
 
 interface ApiConstructProps {
+  certificateArn?: string;
+  domainName: string;
   allowedOrigin: string;
+  hostedZone?: route53.IHostedZone;
   table: dynamodb.Table;
 }
 
@@ -78,5 +84,25 @@ export class ApiConstruct extends Construct {
       methods: [apigatewayv2.HttpMethod.POST],
       path: "/v1/redemptions",
     });
+
+    if (props.certificateArn) {
+      const domainName = new apigatewayv2.DomainName(this, "CustomerApiDomainName", {
+        certificate: acm.Certificate.fromCertificateArn(this, "CustomerApiCertificate", props.certificateArn),
+        domainName: props.domainName,
+      });
+
+      new apigatewayv2.ApiMapping(this, "CustomerApiMapping", {
+        api: this.api,
+        domainName,
+      });
+
+      if (props.hostedZone) {
+        new route53.ARecord(this, "CustomerApiAliasRecord", {
+          recordName: props.domainName,
+          target: route53.RecordTarget.fromAlias(new targets.ApiGatewayv2DomainProperties(domainName.regionalDomainName, domainName.regionalHostedZoneId)),
+          zone: props.hostedZone,
+        });
+      }
+    }
   }
 }

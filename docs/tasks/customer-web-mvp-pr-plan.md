@@ -238,7 +238,29 @@ Acceptance:
 - HTTP API exposes customer MVP routes.
 - Table permissions are granted only to the API Lambda.
 
-## PR 11: Cognito Hosted UI Infrastructure Wiring
+## PR 11: Dev Domain Hosting Foundation
+
+Status: implemented in this working tree.
+
+Goal: support deployment of the customer web app and API under the purchased `mycaffe.in` domain.
+
+Files:
+
+- `infra/cdk/lib/constructs/website.construct.ts`
+- `infra/cdk/lib/constructs/api.construct.ts`
+- `infra/cdk/lib/coffee-subscription-stack.ts`
+- `infra/cdk/lib/config.ts`
+- `docs/infrastructure.md`
+
+Acceptance:
+
+- CDK can host customer web assets from `apps/customer-web/dist` using S3 and CloudFront.
+- CDK supports `dev.mycaffe.in` for web when a us-east-1 certificate ARN is provided.
+- CDK supports `api.dev.mycaffe.in` for the HTTP API when a regional certificate ARN is provided.
+- CDK can create Route 53 alias records when a deploy-account hosted zone is configured.
+- Docs explain the management-account hosted-zone delegation/manual-record options.
+
+## PR 12: Cognito Hosted UI Infrastructure Wiring
 
 Goal: provision Cognito User Pool, Google IdP, and app client settings with AWS CDK.
 
@@ -250,7 +272,7 @@ Files to update/create:
 - `apps/customer-web/src/pages/AuthCallbackPage.tsx`
 - `docs/auth.md`
 
-## PR 12: Subscription and Redemption API
+## PR 13: Subscription and Redemption API
 
 Goal: add customer profile, membership lookup, and redemption APIs with testable service logic.
 
@@ -261,7 +283,7 @@ Files to create:
 - `services/api/src/modules/redemptions/**`
 - `services/api/src/repositories/**`
 
-## PR 13: AWS CDK Deployment Hardening
+## PR 14: AWS CDK Deployment Hardening
 
 Goal: add deployable AWS infrastructure for Cognito, API Gateway, Lambda, and DynamoDB.
 
@@ -274,7 +296,7 @@ Files to create:
 - `infra/cdk/lib/constructs/api.construct.ts`
 - `infra/cdk/lib/constructs/database.construct.ts`
 
-## PR 14: Admin Manual Activation
+## PR 15: Admin Manual Activation
 
 Goal: add admin web and APIs for cafe setup, plan setup, and manual membership activation.
 
