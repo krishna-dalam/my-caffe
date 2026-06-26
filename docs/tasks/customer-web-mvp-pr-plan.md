@@ -151,7 +151,28 @@ Acceptance:
 - Mock mode remains the default development path.
 - Local API integration setup is documented.
 
-## PR 7: Cognito Hosted UI Infrastructure Wiring
+## PR 7: Backend Customer Service Layer
+
+Status: implemented in this working tree.
+
+Goal: move customer and redemption business rules behind service/repository boundaries before adding DynamoDB.
+
+Files:
+
+- `services/api/src/modules/customer/customerRepository.ts`
+- `services/api/src/modules/customer/customerService.ts`
+- `services/api/src/modules/customer/customerService.test.ts`
+- `services/api/src/modules/customer/memoryCustomerRepository.ts`
+- `services/api/src/http/router.ts`
+
+Acceptance:
+
+- Router delegates customer business behavior to `CustomerService`.
+- Memory repository remains the local/demo persistence adapter.
+- Service tests cover membership visibility, redemption count decrement, history storage, and exhausted subscription behavior.
+- HTTP route behavior remains unchanged.
+
+## PR 8: Cognito Hosted UI Infrastructure Wiring
 
 Goal: provision Cognito User Pool, Google IdP, and app client settings with AWS CDK.
 
@@ -163,7 +184,7 @@ Files to update/create:
 - `apps/customer-web/src/pages/AuthCallbackPage.tsx`
 - `docs/auth.md`
 
-## PR 8: Subscription and Redemption API
+## PR 9: Subscription and Redemption API
 
 Goal: add customer profile, membership lookup, and redemption APIs with testable service logic.
 
@@ -174,7 +195,7 @@ Files to create:
 - `services/api/src/modules/redemptions/**`
 - `services/api/src/repositories/**`
 
-## PR 9: AWS CDK Foundation
+## PR 10: AWS CDK Foundation
 
 Goal: add deployable AWS infrastructure for Cognito, API Gateway, Lambda, and DynamoDB.
 
@@ -187,7 +208,7 @@ Files to create:
 - `infra/cdk/lib/constructs/api.construct.ts`
 - `infra/cdk/lib/constructs/database.construct.ts`
 
-## PR 10: Admin Manual Activation
+## PR 11: Admin Manual Activation
 
 Goal: add admin web and APIs for cafe setup, plan setup, and manual membership activation.
 

@@ -1,7 +1,8 @@
 import type { RedeemCoffeeRequest } from "@my-caffe/shared";
 import { randomUUID } from "node:crypto";
-import type { DemoStore } from "../modules/customer/demoStore.js";
-import { createDemoStore } from "../modules/customer/demoStore.js";
+import type { CustomerService } from "../modules/customer/customerService.js";
+import { createCustomerService, RedeemCoffeeError } from "../modules/customer/customerService.js";
+import { createMemoryCustomerRepository } from "../modules/customer/memoryCustomerRepository.js";
 import { created, failure, noContent, ok } from "./responses.js";
 import type { ApiGatewayHttpEvent, ApiGatewayHttpResponse, ApiRequest } from "./types.js";
 
@@ -44,7 +45,9 @@ const parseRedeemRequest = (body: unknown): RedeemCoffeeRequest | null => {
   return typeof cafeId === "string" && cafeId.trim().length > 0 ? { cafeId } : null;
 };
 
-export const createRouter = (store: DemoStore = createDemoStore()): AppRouter => ({
+const createDefaultCustomerService = (): CustomerService => createCustomerService(createMemoryCustomerRepository());
+
+export const createRouter = (customerService: CustomerService = createDefaultCustomerService()): AppRouter => ({
   async handle(event) {
     let request: ApiRequest;
 
@@ -65,7 +68,7 @@ export const createRouter = (store: DemoStore = createDemoStore()): AppRouter =>
 
     const cafeMatch = request.path.match(/^\/v1\/cafes\/([^/]+)$/);
     if (request.method === "GET" && cafeMatch?.[1]) {
-      const view = store.getCafeLanding(decodeURIComponent(cafeMatch[1]), hasBearerToken(request));
+      const view = await customerService.getCafeLanding(decodeURIComponent(cafeMatch[1]), hasBearerToken(request));
       if (!view) {
         return failure("NOT_FOUND", "Cafe not found.", request.requestId, 404);
       }
@@ -78,7 +81,7 @@ export const createRouter = (store: DemoStore = createDemoStore()): AppRouter =>
     }
 
     if (request.method === "GET" && request.path === "/v1/me") {
-      return ok(store.getCustomer(), request.requestId);
+      return ok(await customerService.getCurrentCustomer(), request.requestId);
     }
 
     if (request.method === "GET" && request.path === "/v1/me/redemptions") {
@@ -87,7 +90,7 @@ export const createRouter = (store: DemoStore = createDemoStore()): AppRouter =>
         return failure("VALIDATION_ERROR", "cafeId query parameter is required.", request.requestId, 400);
       }
 
-      return ok(store.getRedemptions(cafeId), request.requestId);
+      return ok(await customerService.getRedemptions(cafeId), request.requestId);
     }
 
     if (request.method === "POST" && request.path === "/v1/redemptions") {
@@ -97,10 +100,10 @@ export const createRouter = (store: DemoStore = createDemoStore()): AppRouter =>
       }
 
       try {
-        return created(store.redeemCoffee(redeemRequest.cafeId), request.requestId);
+        return created(await customerService.redeemCoffee(redeemRequest.cafeId), request.requestId);
       } catch (error) {
         const message = error instanceof Error ? error.message : "Unable to redeem coffee.";
-        const code = message.includes("remaining") ? "NO_REMAINING_COFFEES" : "NO_ACTIVE_MEMBERSHIP";
+        const code = error instanceof RedeemCoffeeError ? error.code : "NO_ACTIVE_MEMBERSHIP";
         return failure(code, message, request.requestId, 400);
       }
     }
