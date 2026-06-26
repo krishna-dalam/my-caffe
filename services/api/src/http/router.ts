@@ -2,7 +2,7 @@ import type { RedeemCoffeeRequest } from "@my-caffe/shared";
 import { randomUUID } from "node:crypto";
 import type { CustomerService } from "../modules/customer/customerService.js";
 import { createCustomerService, RedeemCoffeeError } from "../modules/customer/customerService.js";
-import { createMemoryCustomerRepository } from "../modules/customer/memoryCustomerRepository.js";
+import { createCustomerRepository } from "../modules/customer/repositoryFactory.js";
 import { created, failure, noContent, ok } from "./responses.js";
 import type { ApiGatewayHttpEvent, ApiGatewayHttpResponse, ApiRequest } from "./types.js";
 
@@ -45,7 +45,7 @@ const parseRedeemRequest = (body: unknown): RedeemCoffeeRequest | null => {
   return typeof cafeId === "string" && cafeId.trim().length > 0 ? { cafeId } : null;
 };
 
-const createDefaultCustomerService = (): CustomerService => createCustomerService(createMemoryCustomerRepository());
+const createDefaultCustomerService = (): CustomerService => createCustomerService(createCustomerRepository());
 
 export const createRouter = (customerService: CustomerService = createDefaultCustomerService()): AppRouter => ({
   async handle(event) {

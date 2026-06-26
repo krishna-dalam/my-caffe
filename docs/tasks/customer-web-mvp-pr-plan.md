@@ -172,7 +172,29 @@ Acceptance:
 - Service tests cover membership visibility, redemption count decrement, history storage, and exhausted subscription behavior.
 - HTTP route behavior remains unchanged.
 
-## PR 8: Cognito Hosted UI Infrastructure Wiring
+## PR 8: DynamoDB Repository Scaffold
+
+Status: implemented in this working tree.
+
+Goal: prepare the customer API for DynamoDB persistence while keeping memory as the local default.
+
+Files:
+
+- `services/api/src/config/env.ts`
+- `services/api/src/db/dynamodbClient.ts`
+- `services/api/src/modules/customer/repositoryFactory.ts`
+- `services/api/src/modules/customer/dynamodb/keys.ts`
+- `services/api/src/modules/customer/dynamodb/dynamoCustomerRepository.ts`
+- `docs/data-model.md`
+
+Acceptance:
+
+- `CUSTOMER_REPOSITORY=memory` remains the default.
+- `CUSTOMER_REPOSITORY=dynamodb` selects the DynamoDB repository adapter.
+- DynamoDB table name is validated before adapter use.
+- Single-table key shapes are covered by tests and documented.
+
+## PR 9: Cognito Hosted UI Infrastructure Wiring
 
 Goal: provision Cognito User Pool, Google IdP, and app client settings with AWS CDK.
 
@@ -184,7 +206,7 @@ Files to update/create:
 - `apps/customer-web/src/pages/AuthCallbackPage.tsx`
 - `docs/auth.md`
 
-## PR 9: Subscription and Redemption API
+## PR 10: Subscription and Redemption API
 
 Goal: add customer profile, membership lookup, and redemption APIs with testable service logic.
 
@@ -195,7 +217,7 @@ Files to create:
 - `services/api/src/modules/redemptions/**`
 - `services/api/src/repositories/**`
 
-## PR 10: AWS CDK Foundation
+## PR 11: AWS CDK Foundation
 
 Goal: add deployable AWS infrastructure for Cognito, API Gateway, Lambda, and DynamoDB.
 
@@ -208,7 +230,7 @@ Files to create:
 - `infra/cdk/lib/constructs/api.construct.ts`
 - `infra/cdk/lib/constructs/database.construct.ts`
 
-## PR 11: Admin Manual Activation
+## PR 12: Admin Manual Activation
 
 Goal: add admin web and APIs for cafe setup, plan setup, and manual membership activation.
 
