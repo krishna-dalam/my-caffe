@@ -6,6 +6,8 @@ export interface InfraConfig {
   allowedOrigin: string;
   appEnv: string;
   cognitoDomainPrefix?: string;
+  googleClientId?: string;
+  googleClientSecretName?: string;
   hostedZoneId?: string;
   hostedZoneName?: string;
   rootDomainName: string;
@@ -20,6 +22,9 @@ export const readConfig = (scope: Construct, appEnv: string): InfraConfig => ({
   allowedOrigin: scope.node.tryGetContext("allowedOrigin")?.toString() ?? process.env.ALLOWED_ORIGIN ?? "http://localhost:5173",
   appEnv,
   cognitoDomainPrefix: scope.node.tryGetContext("cognitoDomainPrefix")?.toString() ?? process.env.COGNITO_DOMAIN_PREFIX,
+  googleClientId: scope.node.tryGetContext("googleClientId")?.toString() ?? process.env.GOOGLE_CLIENT_ID,
+  googleClientSecretName:
+    scope.node.tryGetContext("googleClientSecretName")?.toString() ?? process.env.GOOGLE_CLIENT_SECRET_NAME,
   hostedZoneId: scope.node.tryGetContext("hostedZoneId")?.toString() ?? process.env.HOSTED_ZONE_ID,
   hostedZoneName: scope.node.tryGetContext("hostedZoneName")?.toString() ?? process.env.HOSTED_ZONE_NAME,
   rootDomainName: scope.node.tryGetContext("rootDomainName")?.toString() ?? process.env.ROOT_DOMAIN_NAME ?? "mycaffe.in",

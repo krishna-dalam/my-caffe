@@ -34,6 +34,30 @@ The app uses Authorization Code with PKCE:
 
 Do not commit Google client secrets, Cognito secrets, or environment-specific URLs.
 
+## Google IdP Setup
+
+CDK can attach Google as a Cognito identity provider when these values are provided:
+
+```sh
+GOOGLE_CLIENT_ID="google-oauth-client-id"
+GOOGLE_CLIENT_SECRET_NAME="/my-caffe/dev/google-client-secret"
+COGNITO_DOMAIN_PREFIX="my-caffe-dev"
+```
+
+Store the Google OAuth client secret in AWS Secrets Manager under `GOOGLE_CLIENT_SECRET_NAME`. Do not store it in `.env`, source code, or CDK context files.
+
+In Google Cloud Console, add the Cognito Hosted UI callback URL:
+
+```txt
+https://{COGNITO_DOMAIN_PREFIX}.auth.{AWS_REGION}.amazoncognito.com/oauth2/idpresponse
+```
+
+The customer web app callback remains:
+
+```txt
+https://dev.mycaffe.in/auth/callback
+```
+
 ## Local API Integration Mode
 
 Before Cognito infrastructure exists, you can run the customer web app against the local API skeleton using a non-secret development token:

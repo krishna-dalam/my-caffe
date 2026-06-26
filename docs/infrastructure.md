@@ -30,6 +30,8 @@ APP_ENV=dev
 CDK_DEFAULT_REGION=ap-south-1
 ALLOWED_ORIGIN=http://localhost:5173
 COGNITO_DOMAIN_PREFIX=
+GOOGLE_CLIENT_ID=
+GOOGLE_CLIENT_SECRET_NAME=
 ROOT_DOMAIN_NAME=mycaffe.in
 WEB_DOMAIN_NAME=dev.mycaffe.in
 API_DOMAIN_NAME=api.dev.mycaffe.in
@@ -41,7 +43,7 @@ API_CERTIFICATE_ARN=
 
 Production stacks retain the DynamoDB table. Non-production stacks use destroy removal policy to keep early development low-friction.
 
-Google IdP secrets are not part of this slice. They should be wired later through Secrets Manager or secure CI/CD variables, never committed.
+Google IdP client secret wiring uses Secrets Manager through `GOOGLE_CLIENT_SECRET_NAME`; the secret value itself is never committed.
 
 ## Domain Plan
 

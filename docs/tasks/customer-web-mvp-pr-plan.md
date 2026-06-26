@@ -282,7 +282,29 @@ Acceptance:
 - `POST /v1/redemptions` requires Cognito JWT authorization in deployed API Gateway.
 - Local development token path remains local only.
 
-## PR 13: Cognito Hosted UI Infrastructure Wiring
+## PR 13: Cognito Google IdP Infrastructure Wiring
+
+Status: implemented in this working tree.
+
+Goal: configure Cognito Hosted UI to support Google login without committing Google OAuth secrets.
+
+Files:
+
+- `infra/cdk/lib/constructs/auth.construct.ts`
+- `infra/cdk/lib/config.ts`
+- `infra/cdk/lib/coffee-subscription-stack.ts`
+- `infra/cdk/.env.example`
+- `docs/auth.md`
+- `docs/infrastructure.md`
+
+Acceptance:
+
+- CDK supports optional Google identity provider configuration.
+- Google OAuth client secret is referenced from Secrets Manager.
+- Customer web app client supports Google when provider config is present.
+- Docs include Google callback URL and secret storage instructions.
+
+## PR 14: Cognito Hosted UI Environment Wiring
 
 Goal: provision Cognito User Pool, Google IdP, and app client settings with AWS CDK.
 
@@ -294,7 +316,7 @@ Files to update/create:
 - `apps/customer-web/src/pages/AuthCallbackPage.tsx`
 - `docs/auth.md`
 
-## PR 14: Subscription and Redemption API
+## PR 15: Subscription and Redemption API
 
 Goal: add customer profile, membership lookup, and redemption APIs with testable service logic.
 
@@ -305,7 +327,7 @@ Files to create:
 - `services/api/src/modules/redemptions/**`
 - `services/api/src/repositories/**`
 
-## PR 15: AWS CDK Deployment Hardening
+## PR 16: AWS CDK Deployment Hardening
 
 Goal: add deployable AWS infrastructure for Cognito, API Gateway, Lambda, and DynamoDB.
 
@@ -318,7 +340,7 @@ Files to create:
 - `infra/cdk/lib/constructs/api.construct.ts`
 - `infra/cdk/lib/constructs/database.construct.ts`
 
-## PR 16: Admin Manual Activation
+## PR 17: Admin Manual Activation
 
 Goal: add admin web and APIs for cafe setup, plan setup, and manual membership activation.
 

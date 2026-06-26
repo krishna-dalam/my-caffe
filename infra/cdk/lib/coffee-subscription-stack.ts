@@ -23,6 +23,8 @@ export class CoffeeSubscriptionStack extends cdk.Stack {
     const auth = new AuthConstruct(this, "Auth", {
       callbackUrls: [`${config.allowedOrigin}/auth/callback`],
       cognitoDomainPrefix: config.cognitoDomainPrefix,
+      googleClientId: config.googleClientId,
+      googleClientSecretName: config.googleClientSecretName,
       logoutUrls: [config.allowedOrigin],
     });
 

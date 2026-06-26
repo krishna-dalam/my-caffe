@@ -1,9 +1,12 @@
+import * as cdk from "aws-cdk-lib";
 import * as cognito from "aws-cdk-lib/aws-cognito";
 import { Construct } from "constructs";
 
 interface AuthConstructProps {
   callbackUrls: string[];
   cognitoDomainPrefix?: string;
+  googleClientId?: string;
+  googleClientSecretName?: string;
   logoutUrls: string[];
 }
 
@@ -27,6 +30,24 @@ export class AuthConstruct extends Construct {
       },
     });
 
+    const supportedIdentityProviders = [cognito.UserPoolClientIdentityProvider.COGNITO];
+
+    if (props.googleClientId && props.googleClientSecretName) {
+      const googleProvider = new cognito.UserPoolIdentityProviderGoogle(this, "GoogleIdentityProvider", {
+        attributeMapping: {
+          email: cognito.ProviderAttribute.GOOGLE_EMAIL,
+          fullname: cognito.ProviderAttribute.GOOGLE_NAME,
+        },
+        clientId: props.googleClientId,
+        clientSecretValue: cdk.SecretValue.secretsManager(props.googleClientSecretName),
+        scopes: ["openid", "email", "profile"],
+        userPool: this.userPool,
+      });
+
+      supportedIdentityProviders.push(cognito.UserPoolClientIdentityProvider.GOOGLE);
+      this.userPool.registerIdentityProvider(googleProvider);
+    }
+
     this.userPoolClient = new cognito.UserPoolClient(this, "CustomerWebClient", {
       authFlows: {
         userSrp: true,
@@ -41,6 +62,7 @@ export class AuthConstruct extends Construct {
         scopes: [cognito.OAuthScope.EMAIL, cognito.OAuthScope.OPENID, cognito.OAuthScope.PROFILE],
       },
       preventUserExistenceErrors: true,
+      supportedIdentityProviders,
       userPool: this.userPool,
     });
 
