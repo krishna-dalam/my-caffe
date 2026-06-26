@@ -1,7 +1,9 @@
 import * as cdk from "aws-cdk-lib";
 import * as apigatewayv2 from "aws-cdk-lib/aws-apigatewayv2";
+import * as authorizers from "aws-cdk-lib/aws-apigatewayv2-authorizers";
 import * as integrations from "aws-cdk-lib/aws-apigatewayv2-integrations";
 import * as acm from "aws-cdk-lib/aws-certificatemanager";
+import * as cognito from "aws-cdk-lib/aws-cognito";
 import * as dynamodb from "aws-cdk-lib/aws-dynamodb";
 import * as lambda from "aws-cdk-lib/aws-lambda";
 import * as route53 from "aws-cdk-lib/aws-route53";
@@ -16,6 +18,8 @@ interface ApiConstructProps {
   allowedOrigin: string;
   hostedZone?: route53.IHostedZone;
   table: dynamodb.Table;
+  userPool: cognito.IUserPool;
+  userPoolClient: cognito.IUserPoolClient;
 }
 
 export class ApiConstruct extends Construct {
@@ -46,6 +50,9 @@ export class ApiConstruct extends Construct {
     props.table.grantReadWriteData(this.handler);
 
     const integration = new integrations.HttpLambdaIntegration("CustomerApiIntegration", this.handler);
+    const customerAuthorizer = new authorizers.HttpUserPoolAuthorizer("CustomerJwtAuthorizer", props.userPool, {
+      userPoolClients: [props.userPoolClient],
+    });
 
     this.api = new apigatewayv2.HttpApi(this, "CustomerHttpApi", {
       corsPreflight: {
@@ -70,16 +77,19 @@ export class ApiConstruct extends Construct {
       path: "/v1/cafes/{slug}",
     });
     this.api.addRoutes({
+      authorizer: customerAuthorizer,
       integration,
       methods: [apigatewayv2.HttpMethod.GET],
       path: "/v1/me",
     });
     this.api.addRoutes({
+      authorizer: customerAuthorizer,
       integration,
       methods: [apigatewayv2.HttpMethod.GET],
       path: "/v1/me/redemptions",
     });
     this.api.addRoutes({
+      authorizer: customerAuthorizer,
       integration,
       methods: [apigatewayv2.HttpMethod.POST],
       path: "/v1/redemptions",

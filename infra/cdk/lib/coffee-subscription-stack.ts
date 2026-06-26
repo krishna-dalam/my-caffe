@@ -40,6 +40,8 @@ export class CoffeeSubscriptionStack extends cdk.Stack {
       allowedOrigin: config.allowedOrigin,
       hostedZone,
       table: database.table,
+      userPool: auth.userPool,
+      userPoolClient: auth.userPoolClient,
     });
 
     const website = new WebsiteConstruct(this, "Website", {

@@ -260,7 +260,29 @@ Acceptance:
 - CDK can create Route 53 alias records when a deploy-account hosted zone is configured.
 - Docs explain the management-account hosted-zone delegation/manual-record options.
 
-## PR 12: Cognito Hosted UI Infrastructure Wiring
+## PR 12: Cognito JWT API Authorizer
+
+Status: implemented in this working tree.
+
+Goal: enforce Cognito JWT authorization for deployed protected customer API routes.
+
+Files:
+
+- `infra/cdk/lib/constructs/api.construct.ts`
+- `infra/cdk/lib/coffee-subscription-stack.ts`
+- `docs/auth.md`
+- `docs/infrastructure.md`
+
+Acceptance:
+
+- `GET /v1/health` remains public.
+- `GET /v1/cafes/{slug}` remains public for QR landing.
+- `GET /v1/me` requires Cognito JWT authorization in deployed API Gateway.
+- `GET /v1/me/redemptions` requires Cognito JWT authorization in deployed API Gateway.
+- `POST /v1/redemptions` requires Cognito JWT authorization in deployed API Gateway.
+- Local development token path remains local only.
+
+## PR 13: Cognito Hosted UI Infrastructure Wiring
 
 Goal: provision Cognito User Pool, Google IdP, and app client settings with AWS CDK.
 
@@ -272,7 +294,7 @@ Files to update/create:
 - `apps/customer-web/src/pages/AuthCallbackPage.tsx`
 - `docs/auth.md`
 
-## PR 13: Subscription and Redemption API
+## PR 14: Subscription and Redemption API
 
 Goal: add customer profile, membership lookup, and redemption APIs with testable service logic.
 
@@ -283,7 +305,7 @@ Files to create:
 - `services/api/src/modules/redemptions/**`
 - `services/api/src/repositories/**`
 
-## PR 14: AWS CDK Deployment Hardening
+## PR 15: AWS CDK Deployment Hardening
 
 Goal: add deployable AWS infrastructure for Cognito, API Gateway, Lambda, and DynamoDB.
 
@@ -296,7 +318,7 @@ Files to create:
 - `infra/cdk/lib/constructs/api.construct.ts`
 - `infra/cdk/lib/constructs/database.construct.ts`
 
-## PR 15: Admin Manual Activation
+## PR 16: Admin Manual Activation
 
 Goal: add admin web and APIs for cafe setup, plan setup, and manual membership activation.
 

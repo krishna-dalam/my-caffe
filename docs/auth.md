@@ -52,3 +52,18 @@ pnpm dev:customer
 ```
 
 The local API currently accepts any non-empty bearer token. This is only for local integration testing and must be replaced by Cognito JWT verification before deployment.
+
+## Deployed API Authorization
+
+In CDK-managed environments, API Gateway verifies Cognito JWTs before invoking protected customer routes:
+
+- `GET /v1/me`
+- `GET /v1/me/redemptions`
+- `POST /v1/redemptions`
+
+Public routes remain unauthenticated:
+
+- `GET /v1/health`
+- `GET /v1/cafes/:slug`
+
+The local `VITE_DEV_ACCESS_TOKEN` path is only for local development against `pnpm dev:api`.

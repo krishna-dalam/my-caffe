@@ -9,6 +9,7 @@ Current foundation:
 - Optional Cognito hosted domain via `COGNITO_DOMAIN_PREFIX`
 - Lambda for `services/api`
 - HTTP API routes for the customer MVP
+- Cognito JWT authorizer on protected customer API routes
 - Customer web hosting with S3 and CloudFront
 - Optional custom domains for web and API
 
