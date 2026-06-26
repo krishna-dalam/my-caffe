@@ -39,7 +39,12 @@ const jsonRequest = async <T>(path: string, init?: RequestInit): Promise<T> => {
     throw new Error(`Request failed with status ${response.status}`);
   }
 
-  return (await response.json()) as T;
+  const payload = (await response.json()) as T | { data: T };
+  if (payload && typeof payload === "object" && "data" in payload) {
+    return payload.data;
+  }
+
+  return payload;
 };
 
 const realCoffeeApi: CoffeeApi = {

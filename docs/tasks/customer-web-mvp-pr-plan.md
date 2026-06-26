@@ -102,9 +102,11 @@ Acceptance:
 
 ## PR 5: Backend API Skeleton
 
+Status: implemented in this working tree.
+
 Goal: add `services/api` with Lambda-compatible routing, health check, typed config, consistent API responses, and tests.
 
-Files to create:
+Files:
 
 - `services/api/package.json`
 - `services/api/tsconfig.json`
@@ -112,8 +114,18 @@ Files to create:
 - `services/api/src/config/env.ts`
 - `services/api/src/http/router.ts`
 - `services/api/src/http/responses.ts`
-- `services/api/src/modules/health/health.handler.ts`
-- `services/api/src/modules/health/health.test.ts`
+- `services/api/src/http/router.test.ts`
+- `services/api/src/modules/customer/demoStore.ts`
+- `services/api/src/localServer.ts`
+
+Acceptance:
+
+- `GET /v1/health` returns a consistent success envelope.
+- `GET /v1/cafes/:slug` returns cafe landing data.
+- Protected customer routes require a bearer token.
+- `POST /v1/redemptions` decrements remaining coffee count and returns a 4-digit verification code.
+- `GET /v1/me/redemptions` returns redemption history.
+- API business flow is covered by tests.
 
 ## PR 6: Cognito Hosted UI Infrastructure Wiring
 
