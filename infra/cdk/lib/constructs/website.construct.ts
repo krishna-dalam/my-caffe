@@ -14,6 +14,7 @@ interface WebsiteConstructProps {
   certificateArn?: string;
   domainName: string;
   hostedZone?: route53.IHostedZone;
+  runtimeConfig: Record<string, string | boolean>;
 }
 
 export class WebsiteConstruct extends Construct {
@@ -65,7 +66,12 @@ export class WebsiteConstruct extends Construct {
       destinationBucket: this.bucket,
       distribution: this.distribution,
       distributionPaths: ["/*"],
-      sources: [s3deploy.Source.asset(webDistPath)],
+      sources: [
+        s3deploy.Source.asset(webDistPath),
+        s3deploy.Source.jsonData("config.json", props.runtimeConfig, {
+          escape: true,
+        }),
+      ],
     });
 
     if (certificate && props.hostedZone) {

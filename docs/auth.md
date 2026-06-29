@@ -34,6 +34,21 @@ The app uses Authorization Code with PKCE:
 
 Do not commit Google client secrets, Cognito secrets, or environment-specific URLs.
 
+## Deployed Runtime Config
+
+The deployed customer web app loads `/config.json` before rendering. CDK publishes this file alongside the static web assets so deploy-time values do not need to be baked into the Vite build.
+
+Runtime config fields:
+
+- `apiBaseUrl`
+- `appName`
+- `cognitoClientId`
+- `cognitoDomain`
+- `cognitoRedirectUri`
+- `useMockApi`
+
+`VITE_DEV_ACCESS_TOKEN` is never read from runtime config and remains local-only.
+
 ## Google IdP Setup
 
 CDK can attach Google as a Cognito identity provider when these values are provided:

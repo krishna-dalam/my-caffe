@@ -50,6 +50,16 @@ export class CoffeeSubscriptionStack extends cdk.Stack {
       certificateArn: config.webCertificateArn,
       domainName: config.webDomainName,
       hostedZone,
+      runtimeConfig: {
+        apiBaseUrl: `${config.apiCertificateArn ? `https://${config.apiDomainName}` : api.api.apiEndpoint}/v1`,
+        appName: "My Caffe",
+        cognitoClientId: auth.userPoolClient.userPoolClientId,
+        cognitoDomain: config.cognitoDomainPrefix
+          ? `https://${config.cognitoDomainPrefix}.auth.${cdk.Stack.of(this).region}.amazoncognito.com`
+          : "",
+        cognitoRedirectUri: `${config.allowedOrigin}/auth/callback`,
+        useMockApi: false,
+      },
     });
 
     new cdk.CfnOutput(this, "CoffeeTableName", {
@@ -72,6 +82,9 @@ export class CoffeeSubscriptionStack extends cdk.Stack {
     });
     new cdk.CfnOutput(this, "CustomerUserPoolClientId", {
       value: auth.userPoolClient.userPoolClientId,
+    });
+    new cdk.CfnOutput(this, "CustomerWebRuntimeConfigPath", {
+      value: "/config.json",
     });
   }
 }

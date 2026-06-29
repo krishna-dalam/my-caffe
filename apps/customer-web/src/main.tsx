@@ -1,6 +1,6 @@
 import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { App } from "./App";
+import { loadRuntimeConfig } from "./config/env";
 
 const rootElement = document.getElementById("root");
 
@@ -8,8 +8,15 @@ if (!rootElement) {
   throw new Error("Root element not found.");
 }
 
-createRoot(rootElement).render(
-  <StrictMode>
-    <App />
-  </StrictMode>,
-);
+const bootstrap = async (): Promise<void> => {
+  await loadRuntimeConfig();
+  const { App } = await import("./App");
+
+  createRoot(rootElement).render(
+    <StrictMode>
+      <App />
+    </StrictMode>,
+  );
+};
+
+void bootstrap();

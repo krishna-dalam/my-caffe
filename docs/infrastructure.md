@@ -11,6 +11,7 @@ Current foundation:
 - HTTP API routes for the customer MVP
 - Cognito JWT authorizer on protected customer API routes
 - Customer web hosting with S3 and CloudFront
+- Customer web runtime config published as `/config.json`
 - Optional custom domains for web and API
 
 ## Synth
@@ -22,6 +23,8 @@ pnpm infra:synth
 ```
 
 `infra:synth` builds `services/api` before running `cdk synth` because the Lambda asset uses `services/api/dist`.
+
+CDK also deploys a runtime config file for the customer web app at `/config.json`. This lets the static Vite build read the deployed API URL and Cognito client ID at runtime instead of requiring those values during `pnpm build`.
 
 ## Environment
 
@@ -65,3 +68,20 @@ Certificate requirements:
 - `API_CERTIFICATE_ARN` must be an ACM certificate in the API stack region, currently `ap-south-1`.
 
 If certificate ARNs are not provided, CDK still creates the CloudFront distribution and API endpoint, but it does not attach custom domains.
+
+## Customer Web Runtime Config
+
+The website deployment uploads the built files from `apps/customer-web/dist` plus a generated `config.json`:
+
+```json
+{
+  "apiBaseUrl": "https://api.dev.mycaffe.in/v1",
+  "appName": "My Caffe",
+  "cognitoClientId": "<Cognito app client id>",
+  "cognitoDomain": "https://my-caffe-dev.auth.ap-south-1.amazoncognito.com",
+  "cognitoRedirectUri": "https://dev.mycaffe.in/auth/callback",
+  "useMockApi": false
+}
+```
+
+If `API_CERTIFICATE_ARN` is absent, `apiBaseUrl` falls back to the generated API Gateway endpoint plus `/v1`.
