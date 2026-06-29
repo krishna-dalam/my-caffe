@@ -401,7 +401,27 @@ Acceptance:
 - Runbook documents DNS options for management-account DNS versus delegated hosted zone.
 - Runbook documents manual customer activation and customer smoke test steps.
 
-## PR 18: Cognito Hosted UI Environment Wiring
+## PR 18: Monorepo CI Verification
+
+Status: implemented in this working tree.
+
+Goal: run the same verification gates in GitHub Actions that are used locally before pushing each PR-sized slice.
+
+Files:
+
+- `.github/workflows/ci.yml`
+- `README.md`
+- `docs/tasks/customer-web-mvp-pr-plan.md`
+
+Acceptance:
+
+- CI runs on pull requests.
+- CI runs on pushes to `main`.
+- CI installs dependencies with `pnpm install --frozen-lockfile`.
+- CI runs build, typecheck, lint, test, and CDK synth.
+- CI has read-only repository permissions.
+
+## PR 19: Cognito Hosted UI Environment Wiring
 
 Goal: provision Cognito User Pool, Google IdP, and app client settings with AWS CDK.
 
@@ -413,7 +433,7 @@ Files to update/create:
 - `apps/customer-web/src/pages/AuthCallbackPage.tsx`
 - `docs/auth.md`
 
-## PR 19: Subscription and Redemption API
+## PR 20: Subscription and Redemption API
 
 Goal: add customer profile, membership lookup, and redemption APIs with testable service logic.
 
@@ -424,7 +444,7 @@ Files to create:
 - `services/api/src/modules/redemptions/**`
 - `services/api/src/repositories/**`
 
-## PR 20: AWS CDK Deployment Hardening
+## PR 21: AWS CDK Deployment Hardening
 
 Goal: add deployable AWS infrastructure for Cognito, API Gateway, Lambda, and DynamoDB.
 
@@ -437,7 +457,7 @@ Files to create:
 - `infra/cdk/lib/constructs/api.construct.ts`
 - `infra/cdk/lib/constructs/database.construct.ts`
 
-## PR 21: Admin Manual Activation
+## PR 22: Admin Manual Activation
 
 Goal: add admin web and APIs for cafe setup, plan setup, and manual membership activation.
 

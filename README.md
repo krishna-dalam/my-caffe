@@ -51,6 +51,10 @@ Then run `pnpm dev:api` and `pnpm dev:customer` in separate terminals.
 
 Use [docs/deployment-dev.md](docs/deployment-dev.md) for the `dev.mycaffe.in` deployment runbook.
 
+## CI
+
+GitHub Actions runs build, typecheck, lint, test, and CDK synth on pushes to `main` and pull requests.
+
 ## Current Implementation Slice
 
 The customer web app defaults to a typed mock API so the end-to-end customer flow is usable before AWS infrastructure exists. The backend API skeleton exposes matching customer routes with in-memory demo data and a Lambda-compatible handler.
