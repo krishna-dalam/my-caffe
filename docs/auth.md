@@ -101,3 +101,24 @@ Protected API requests use the API Gateway JWT authorizer claims to identify the
 - Local API integration with `VITE_DEV_ACCESS_TOKEN` still maps to `customer_demo_001` for development only.
 
 Manual subscription activation must create the customer profile and membership records for the Cognito `sub` before a real customer can redeem coffee in DynamoDB mode.
+
+## Manual Customer Activation
+
+Until the admin app exists, activate a customer manually with the API workspace script after you know the customer's Cognito `sub`:
+
+```sh
+COFFEE_TABLE_NAME="MyCaffe-dev-table-name" \
+AWS_REGION="ap-south-1" \
+pnpm activate:customer \
+  --customer-id "cognito-sub-from-token" \
+  --customer-email "customer@example.com" \
+  --customer-name "Customer Name"
+```
+
+The script creates:
+
+- cafe profile and slug lookup records for `/c/blue-bottle-demo`
+- customer profile under `CUSTOMER#{sub}`
+- active membership with 8 coffees
+
+By default, it refuses to overwrite existing records. Use `--overwrite` only when intentionally resetting a dev customer membership.

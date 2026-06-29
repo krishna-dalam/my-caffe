@@ -50,3 +50,5 @@ The DynamoDB adapter commits redemptions with a transaction:
 - insert the redemption record with `attribute_not_exists` protection
 
 This prevents duplicated redemption records and avoids overwriting a concurrent membership update.
+
+Manual dev activation is available through `pnpm activate:customer`. It writes the cafe slug lookup, cafe profile, customer profile, and active membership records needed for a Cognito-authenticated customer to redeem coffee before the admin app exists.

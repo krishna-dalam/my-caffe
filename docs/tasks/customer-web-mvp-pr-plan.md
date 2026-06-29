@@ -330,7 +330,31 @@ Acceptance:
 - Local development bearer token still maps to `customer_demo_001`.
 - Tests prove two Cognito subjects do not share redemption history.
 
-## PR 15: Cognito Hosted UI Environment Wiring
+## PR 15: Manual Customer Activation Script
+
+Status: implemented in this working tree.
+
+Goal: provide a safe placeholder activation path so a Cognito customer can be given an active coffee membership in DynamoDB before the admin app and Razorpay exist.
+
+Files:
+
+- `services/api/src/modules/customer/manualActivation.ts`
+- `services/api/src/modules/customer/manualActivation.test.ts`
+- `services/api/src/scripts/activateCustomer.ts`
+- `services/api/package.json`
+- `package.json`
+- `docs/auth.md`
+- `docs/data-model.md`
+
+Acceptance:
+
+- Activation creates cafe profile, cafe slug lookup, customer profile, and membership records.
+- Activation records use Cognito `sub` as the customer ID.
+- Default activation is non-overwriting to avoid resetting an existing dev subscription by accident.
+- `--overwrite` is available for intentional dev resets.
+- Unit tests cover the DynamoDB item shapes.
+
+## PR 16: Cognito Hosted UI Environment Wiring
 
 Goal: provision Cognito User Pool, Google IdP, and app client settings with AWS CDK.
 
@@ -342,7 +366,7 @@ Files to update/create:
 - `apps/customer-web/src/pages/AuthCallbackPage.tsx`
 - `docs/auth.md`
 
-## PR 16: Subscription and Redemption API
+## PR 17: Subscription and Redemption API
 
 Goal: add customer profile, membership lookup, and redemption APIs with testable service logic.
 
@@ -353,7 +377,7 @@ Files to create:
 - `services/api/src/modules/redemptions/**`
 - `services/api/src/repositories/**`
 
-## PR 17: AWS CDK Deployment Hardening
+## PR 18: AWS CDK Deployment Hardening
 
 Goal: add deployable AWS infrastructure for Cognito, API Gateway, Lambda, and DynamoDB.
 
@@ -366,7 +390,7 @@ Files to create:
 - `infra/cdk/lib/constructs/api.construct.ts`
 - `infra/cdk/lib/constructs/database.construct.ts`
 
-## PR 18: Admin Manual Activation
+## PR 19: Admin Manual Activation
 
 Goal: add admin web and APIs for cafe setup, plan setup, and manual membership activation.
 

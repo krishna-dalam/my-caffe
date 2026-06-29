@@ -4,6 +4,7 @@
   "private": true,
   "packageManager": "pnpm@9.15.4",
   "scripts": {
+    "activate:customer": "pnpm --filter @my-caffe/api activate:customer",
     "build": "pnpm -r build",
     "dev:api": "pnpm --filter @my-caffe/api dev",
     "dev:customer": "pnpm --filter @my-caffe/customer-web dev",

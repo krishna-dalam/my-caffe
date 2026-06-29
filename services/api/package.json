@@ -5,6 +5,7 @@
   "type": "module",
   "main": "./dist/handler.js",
   "scripts": {
+    "activate:customer": "tsx src/scripts/activateCustomer.ts",
     "build": "tsc -p tsconfig.json",
     "dev": "tsx src/localServer.ts",
     "lint": "tsc -p tsconfig.json --noEmit",
