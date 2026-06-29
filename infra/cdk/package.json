@@ -6,6 +6,7 @@
   "scripts": {
     "build": "tsc -p tsconfig.json",
     "deploy": "pnpm synth && cdk deploy",
+    "deploy:ci": "pnpm synth && cdk deploy --require-approval never",
     "diff": "pnpm synth && cdk diff",
     "lint": "tsc -p tsconfig.json --noEmit",
     "synth": "pnpm --filter @my-caffe/api build && pnpm --filter @my-caffe/customer-web build && cdk synth",

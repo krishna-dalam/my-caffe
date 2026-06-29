@@ -9,6 +9,7 @@
     "dev:api": "pnpm --filter @my-caffe/api dev",
     "dev:customer": "pnpm --filter @my-caffe/customer-web dev",
     "infra:deploy": "pnpm --filter @my-caffe/infra-cdk deploy",
+    "infra:deploy:ci": "pnpm --filter @my-caffe/infra-cdk deploy:ci",
     "infra:diff": "pnpm --filter @my-caffe/infra-cdk diff",
     "infra:synth": "pnpm --filter @my-caffe/infra-cdk synth",
     "lint": "pnpm -r lint",

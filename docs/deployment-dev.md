@@ -92,6 +92,32 @@ pnpm infra:deploy
 
 CDK deploys `apps/customer-web/dist` and a generated `/config.json` file. The runtime config points the web app at the deployed API and Cognito client.
 
+## GitHub Actions Deploy
+
+The `Deploy Dev` workflow is manual-only and uses GitHub OIDC to assume an AWS role. Configure a protected GitHub environment named `dev`.
+
+Environment secret:
+
+```txt
+DEV_AWS_DEPLOY_ROLE_ARN
+```
+
+Environment variables:
+
+```txt
+DEV_API_CERTIFICATE_ARN
+DEV_AWS_ACCOUNT_ID
+DEV_GOOGLE_CLIENT_ID
+DEV_GOOGLE_CLIENT_SECRET_NAME
+DEV_HOSTED_ZONE_ID
+DEV_HOSTED_ZONE_NAME
+DEV_WEB_CERTIFICATE_ARN
+```
+
+If DNS remains in the management account, leave `DEV_HOSTED_ZONE_ID` and `DEV_HOSTED_ZONE_NAME` empty and create DNS records manually after deploy.
+
+The assumed AWS role should trust this repository's GitHub OIDC provider and be scoped to the `dev` environment where possible. The workflow runs build, typecheck, lint, tests, then `pnpm infra:deploy:ci`.
+
 ## DNS
 
 When `HOSTED_ZONE_ID` is configured, CDK creates Route 53 alias records.

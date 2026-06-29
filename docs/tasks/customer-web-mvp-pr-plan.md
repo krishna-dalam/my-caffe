@@ -421,7 +421,31 @@ Acceptance:
 - CI runs build, typecheck, lint, test, and CDK synth.
 - CI has read-only repository permissions.
 
-## PR 19: Cognito Hosted UI Environment Wiring
+## PR 19: Manual Dev Deploy Workflow
+
+Status: implemented in this working tree.
+
+Goal: provide a controlled GitHub Actions path to deploy the dev customer MVP once the AWS OIDC role, certificates, Google OAuth settings, and DNS variables are configured.
+
+Files:
+
+- `.github/workflows/deploy-dev.yml`
+- `package.json`
+- `infra/cdk/package.json`
+- `docs/deployment-dev.md`
+- `README.md`
+- `docs/tasks/customer-web-mvp-pr-plan.md`
+
+Acceptance:
+
+- Deploy workflow is manual-only through `workflow_dispatch`.
+- Workflow uses GitHub OIDC with `id-token: write`.
+- Workflow targets the protected `dev` environment.
+- Workflow runs build, typecheck, lint, and tests before deploy.
+- Workflow deploys CDK with `--require-approval never` through `pnpm infra:deploy:ci`.
+- Runbook documents required GitHub secret and variables.
+
+## PR 20: Cognito Hosted UI Environment Wiring
 
 Goal: provision Cognito User Pool, Google IdP, and app client settings with AWS CDK.
 
@@ -433,7 +457,7 @@ Files to update/create:
 - `apps/customer-web/src/pages/AuthCallbackPage.tsx`
 - `docs/auth.md`
 
-## PR 20: Subscription and Redemption API
+## PR 21: Subscription and Redemption API
 
 Goal: add customer profile, membership lookup, and redemption APIs with testable service logic.
 
@@ -444,7 +468,7 @@ Files to create:
 - `services/api/src/modules/redemptions/**`
 - `services/api/src/repositories/**`
 
-## PR 21: AWS CDK Deployment Hardening
+## PR 22: AWS CDK Deployment Hardening
 
 Goal: add deployable AWS infrastructure for Cognito, API Gateway, Lambda, and DynamoDB.
 
@@ -457,7 +481,7 @@ Files to create:
 - `infra/cdk/lib/constructs/api.construct.ts`
 - `infra/cdk/lib/constructs/database.construct.ts`
 
-## PR 22: Admin Manual Activation
+## PR 23: Admin Manual Activation
 
 Goal: add admin web and APIs for cafe setup, plan setup, and manual membership activation.
 

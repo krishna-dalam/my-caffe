@@ -50,6 +50,7 @@ Then run `pnpm dev:api` and `pnpm dev:customer` in separate terminals.
 ## Dev Deployment
 
 Use [docs/deployment-dev.md](docs/deployment-dev.md) for the `dev.mycaffe.in` deployment runbook.
+Deployment is manual-only through local CDK commands or the `Deploy Dev` GitHub Actions workflow.
 
 ## CI
 

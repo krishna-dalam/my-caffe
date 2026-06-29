@@ -1,0 +1,77 @@
+name: Deploy Dev
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: deploy-dev
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  deploy:
+    name: Deploy dev
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    environment:
+      name: dev
+      url: https://dev.mycaffe.in
+
+    env:
+      ALLOWED_ORIGIN: https://dev.mycaffe.in
+      API_CERTIFICATE_ARN: ${{ vars.DEV_API_CERTIFICATE_ARN }}
+      API_DOMAIN_NAME: api.dev.mycaffe.in
+      APP_ENV: dev
+      CDK_DEFAULT_ACCOUNT: ${{ vars.DEV_AWS_ACCOUNT_ID }}
+      CDK_DEFAULT_REGION: ap-south-1
+      COGNITO_DOMAIN_PREFIX: my-caffe-dev
+      GOOGLE_CLIENT_ID: ${{ vars.DEV_GOOGLE_CLIENT_ID }}
+      GOOGLE_CLIENT_SECRET_NAME: ${{ vars.DEV_GOOGLE_CLIENT_SECRET_NAME }}
+      HOSTED_ZONE_ID: ${{ vars.DEV_HOSTED_ZONE_ID }}
+      HOSTED_ZONE_NAME: ${{ vars.DEV_HOSTED_ZONE_NAME }}
+      ROOT_DOMAIN_NAME: mycaffe.in
+      WEB_CERTIFICATE_ARN: ${{ vars.DEV_WEB_CERTIFICATE_ARN }}
+      WEB_DOMAIN_NAME: dev.mycaffe.in
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9.15.4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          cache: pnpm
+          node-version: 22
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-region: ap-south-1
+          role-to-assume: ${{ secrets.DEV_AWS_DEPLOY_ROLE_ARN }}
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Build
+        run: pnpm build
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Test
+        run: pnpm test
+
+      - name: Deploy CDK stack
+        run: pnpm infra:deploy:ci
