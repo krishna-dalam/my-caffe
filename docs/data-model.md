@@ -32,7 +32,7 @@ CAFE_SLUG#{slug}            PROFILE
 CAFE#{cafeId}               PROFILE
 ```
 
-For deployed authenticated customer routes, `customerId` is the Cognito `sub` claim from the API Gateway JWT authorizer. Local memory mode uses `customer_demo_001` when called with the development bearer token.
+For deployed authenticated customer routes, `customerId` is the Cognito `sub` claim from the API Gateway JWT authorizer. `GET /v1/me` creates the `CUSTOMER#{sub}` profile record from Cognito claims on first login. Local memory mode uses `customer_demo_001` when called with the development bearer token.
 
 GSI examples:
 
@@ -51,4 +51,4 @@ The DynamoDB adapter commits redemptions with a transaction:
 
 This prevents duplicated redemption records and avoids overwriting a concurrent membership update.
 
-Manual dev activation is available through `pnpm activate:customer`. It writes the cafe slug lookup, cafe profile, customer profile, and active membership records needed for a Cognito-authenticated customer to redeem coffee before the admin app exists.
+Manual dev activation is available through `pnpm activate:customer`. It writes the cafe slug lookup, cafe profile, customer profile, and active membership records needed for a Cognito-authenticated customer to redeem coffee before the admin app exists. If the customer has already logged in, the customer profile may already exist; use `--overwrite` only when intentionally resetting dev data.

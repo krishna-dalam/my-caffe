@@ -1,6 +1,6 @@
 import type { CafeLandingView, Customer, RedeemCoffeeResponse, Redemption } from "@my-caffe/shared";
 import { randomUUID } from "node:crypto";
-import type { CustomerRepository } from "./customerRepository.js";
+import type { CustomerProfileInput, CustomerRepository } from "./customerRepository.js";
 
 export type RedeemCoffeeErrorCode = "NO_ACTIVE_MEMBERSHIP" | "NO_REMAINING_COFFEES";
 
@@ -15,7 +15,7 @@ export class RedeemCoffeeError extends Error {
 
 export interface CustomerService {
   getCafeLanding(slug: string, isAuthenticated: boolean): Promise<CafeLandingView | null>;
-  getCurrentCustomer(): Promise<Customer>;
+  getCurrentCustomer(profile?: CustomerProfileInput): Promise<Customer>;
   getRedemptions(cafeId: string): Promise<Redemption[]>;
   redeemCoffee(cafeId: string): Promise<RedeemCoffeeResponse>;
 }
@@ -33,8 +33,8 @@ export const createCustomerService = (repository: CustomerRepository): CustomerS
     };
   },
 
-  getCurrentCustomer() {
-    return repository.getCurrentCustomer();
+  getCurrentCustomer(profile) {
+    return profile ? repository.getOrCreateCurrentCustomer(profile) : repository.getCurrentCustomer();
   },
 
   getRedemptions(cafeId) {

@@ -126,9 +126,13 @@ describe("customer API router", () => {
     expect(redeemForCustomerA.statusCode).toBe(201);
     expect(parseBody<{ data: unknown[] }>(customerAHistory.body).data).toHaveLength(1);
     expect(parseBody<{ data: unknown[] }>(customerBHistory.body).data).toHaveLength(0);
-    expect(parseBody<{ data: { customerId: string } }>(customerBProfile.body).data.customerId).toBe(
-      "cognito_customer_b",
-    );
+    expect(
+      parseBody<{ data: { customerId: string; displayName: string; email: string } }>(customerBProfile.body).data,
+    ).toEqual({
+      customerId: "cognito_customer_b",
+      displayName: "Customer B",
+      email: "customer-b@example.com",
+    });
   });
 
   it("blocks redemption after coffee count reaches zero", async () => {

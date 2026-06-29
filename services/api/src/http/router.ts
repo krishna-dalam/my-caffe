@@ -141,7 +141,7 @@ export const createRouter = (customerService?: CustomerService): AppRouter => {
       const service = getService(request.principal);
 
       if (request.method === "GET" && request.path === "/v1/me") {
-        return ok(await service.getCurrentCustomer(), request.requestId);
+        return ok(await service.getCurrentCustomer(request.principal), request.requestId);
       }
 
       if (request.method === "GET" && request.path === "/v1/me/redemptions") {

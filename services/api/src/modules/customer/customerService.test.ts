@@ -27,6 +27,22 @@ describe("customerService", () => {
     expect(redemptions[0]?.remainingCoffeesAfterRedeem).toBe(7);
   });
 
+  it("creates current customer profile from authenticated claims when available", async () => {
+    const service = createCustomerService(createMemoryCustomerRepository({ customerId: "cognito_customer_001" }));
+
+    const customer = await service.getCurrentCustomer({
+      customerId: "cognito_customer_001",
+      displayName: "Customer One",
+      email: "customer-one@example.com",
+    });
+
+    expect(customer).toEqual({
+      customerId: "cognito_customer_001",
+      displayName: "Customer One",
+      email: "customer-one@example.com",
+    });
+  });
+
   it("blocks redemption when coffee count is exhausted", async () => {
     const service = createCustomerService(createMemoryCustomerRepository());
 

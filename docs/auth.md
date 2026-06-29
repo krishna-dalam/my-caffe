@@ -112,10 +112,11 @@ The local `VITE_DEV_ACCESS_TOKEN` path is only for local development against `pn
 Protected API requests use the API Gateway JWT authorizer claims to identify the current customer.
 
 - The Cognito `sub` claim is used as the backend `customerId`.
+- `GET /v1/me` creates the customer profile from Cognito `sub`, `email`, and `name` claims if it does not already exist.
 - DynamoDB customer profile, membership, and redemption records are scoped under `CUSTOMER#{sub}`.
 - Local API integration with `VITE_DEV_ACCESS_TOKEN` still maps to `customer_demo_001` for development only.
 
-Manual subscription activation must create the customer profile and membership records for the Cognito `sub` before a real customer can redeem coffee in DynamoDB mode.
+Manual subscription activation must create the membership records for the Cognito `sub` before a real customer can redeem coffee in DynamoDB mode.
 
 ## Manual Customer Activation
 

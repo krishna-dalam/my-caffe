@@ -1,6 +1,6 @@
-import { GetCommand, QueryCommand, TransactWriteCommand, type DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
+import { GetCommand, PutCommand, QueryCommand, TransactWriteCommand, type DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 import type { Cafe, Customer, Membership, Redemption } from "@my-caffe/shared";
-import type { CustomerRepository } from "../customerRepository.js";
+import type { CustomerProfileInput, CustomerRepository } from "../customerRepository.js";
 import { customerKeys, gsiKeys } from "./keys.js";
 
 type StoredCafe = Cafe & { cafeId: string; entityType: "Cafe" };
@@ -20,12 +20,43 @@ const requireTableName = (tableName: string): void => {
   }
 };
 
+const toCustomer = (profile: CustomerProfileInput): Customer => ({
+  customerId: profile.customerId,
+  displayName: profile.displayName ?? "Coffee Member",
+  email: profile.email ?? `${profile.customerId}@example.test`,
+});
+
+const isConditionalCheckFailed = (error: unknown): boolean =>
+  typeof error === "object" &&
+  error !== null &&
+  "name" in error &&
+  (error as { name?: unknown }).name === "ConditionalCheckFailedException";
+
 export const createDynamoCustomerRepository = ({
   client,
   customerId,
   tableName,
 }: DynamoCustomerRepositoryOptions): CustomerRepository => {
   requireTableName(tableName);
+
+  const readCurrentCustomer = async (): Promise<StoredCustomer> => {
+    const key = customerKeys.customerProfile(customerId);
+    const response = await client.send(
+      new GetCommand({
+        Key: {
+          PK: key.pk,
+          SK: key.sk,
+        },
+        TableName: tableName,
+      }),
+    );
+
+    if (!response.Item) {
+      throw new Error("Customer profile not found.");
+    }
+
+    return response.Item as StoredCustomer;
+  };
 
   return {
     async commitRedemption(currentMembership, nextMembership, redemption) {
@@ -100,22 +131,44 @@ export const createDynamoCustomerRepository = ({
     },
 
     async getCurrentCustomer() {
-      const key = customerKeys.customerProfile(customerId);
-      const response = await client.send(
-        new GetCommand({
-          Key: {
-            PK: key.pk,
-            SK: key.sk,
-          },
-          TableName: tableName,
-        }),
-      );
+      return readCurrentCustomer();
+    },
 
-      if (!response.Item) {
-        throw new Error("Customer profile not found.");
+    async getOrCreateCurrentCustomer(profile) {
+      const existingCustomer = await readCurrentCustomer().catch((error: unknown) => {
+        if (error instanceof Error && error.message === "Customer profile not found.") {
+          return null;
+        }
+
+        throw error;
+      });
+      if (existingCustomer) {
+        return existingCustomer;
       }
 
-      return response.Item as StoredCustomer;
+      const key = customerKeys.customerProfile(profile.customerId);
+      const customer = toCustomer(profile);
+
+      try {
+        await client.send(
+          new PutCommand({
+            ConditionExpression: "attribute_not_exists(PK) AND attribute_not_exists(SK)",
+            Item: {
+              ...customer,
+              PK: key.pk,
+              SK: key.sk,
+              entityType: "Customer",
+            },
+            TableName: tableName,
+          }),
+        );
+      } catch (error) {
+        if (!isConditionalCheckFailed(error)) {
+          throw error;
+        }
+      }
+
+      return readCurrentCustomer();
     },
 
     async getMembershipForCafe(cafeId) {

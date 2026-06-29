@@ -1,5 +1,5 @@
 import type { Cafe, Customer, Membership, Redemption } from "@my-caffe/shared";
-import type { CustomerRepository } from "./customerRepository.js";
+import type { CustomerProfileInput, CustomerRepository } from "./customerRepository.js";
 
 const demoCafe: Cafe = {
   cafeId: "cafe_demo_001",
@@ -28,6 +28,12 @@ const makeCustomer = (customerId: string): Customer =>
         email: `${customerId}@example.test`,
       };
 
+const makeCustomerFromProfile = (profile: CustomerProfileInput): Customer => ({
+  customerId: profile.customerId,
+  displayName: profile.displayName ?? "Coffee Member",
+  email: profile.email ?? `${profile.customerId}@example.test`,
+});
+
 const makeMembership = (customerId: string): Membership => ({
   membershipId: "membership_demo_001",
   customerId,
@@ -43,7 +49,7 @@ const makeMembership = (customerId: string): Membership => ({
 export const createMemoryCustomerRepository = ({
   customerId = demoCustomer.customerId,
 }: MemoryCustomerRepositoryOptions = {}): CustomerRepository => {
-  const customer = makeCustomer(customerId);
+  let customer = makeCustomer(customerId);
   let membership = makeMembership(customer.customerId);
   let redemptions: Redemption[] = [];
 
@@ -58,6 +64,20 @@ export const createMemoryCustomerRepository = ({
     },
 
     async getCurrentCustomer() {
+      return customer;
+    },
+
+    async getOrCreateCurrentCustomer(profile) {
+      if (customer.customerId !== profile.customerId) {
+        customer = makeCustomerFromProfile(profile);
+      } else {
+        customer = {
+          ...customer,
+          displayName: profile.displayName ?? customer.displayName,
+          email: profile.email ?? customer.email,
+        };
+      }
+
       return customer;
     },
 

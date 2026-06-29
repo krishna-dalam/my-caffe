@@ -104,4 +104,103 @@ describe("dynamoCustomerRepository", () => {
       },
     });
   });
+
+  it("returns existing customer profile without overwriting it", async () => {
+    const sentCommands: unknown[] = [];
+    const repository = createDynamoCustomerRepository({
+      client: {
+        send: async (command: unknown) => {
+          sentCommands.push(command);
+          return {
+            Item: {
+              PK: "CUSTOMER#customer_001",
+              SK: "PROFILE",
+              customerId: "customer_001",
+              displayName: "Existing Customer",
+              email: "existing@example.com",
+              entityType: "Customer",
+            },
+          };
+        },
+      },
+      customerId: "customer_001",
+      tableName: "CoffeeTable",
+    });
+
+    const customer = await repository.getOrCreateCurrentCustomer({
+      customerId: "customer_001",
+      displayName: "New Customer",
+      email: "new@example.com",
+    });
+
+    expect(customer).toMatchObject({
+      customerId: "customer_001",
+      displayName: "Existing Customer",
+      email: "existing@example.com",
+    });
+    expect(sentCommands).toHaveLength(1);
+  });
+
+  it("creates customer profile when first Cognito login has no profile record", async () => {
+    const sentCommands: unknown[] = [];
+    const repository = createDynamoCustomerRepository({
+      client: {
+        send: async (command: unknown) => {
+          sentCommands.push(command);
+
+          if (sentCommands.length === 1) {
+            return {};
+          }
+
+          if (sentCommands.length === 3) {
+            return {
+              Item: {
+                PK: "CUSTOMER#customer_001",
+                SK: "PROFILE",
+                customerId: "customer_001",
+                displayName: "New Customer",
+                email: "new@example.com",
+                entityType: "Customer",
+              },
+            };
+          }
+
+          return {};
+        },
+      },
+      customerId: "customer_001",
+      tableName: "CoffeeTable",
+    });
+
+    const customer = await repository.getOrCreateCurrentCustomer({
+      customerId: "customer_001",
+      displayName: "New Customer",
+      email: "new@example.com",
+    });
+    const putCommand = sentCommands[1] as {
+      input: {
+        ConditionExpression: string;
+        Item: Record<string, unknown>;
+        TableName: string;
+      };
+    };
+
+    expect(customer).toMatchObject({
+      customerId: "customer_001",
+      displayName: "New Customer",
+      email: "new@example.com",
+    });
+    expect(putCommand.input).toMatchObject({
+      ConditionExpression: "attribute_not_exists(PK) AND attribute_not_exists(SK)",
+      Item: {
+        PK: "CUSTOMER#customer_001",
+        SK: "PROFILE",
+        customerId: "customer_001",
+        displayName: "New Customer",
+        email: "new@example.com",
+        entityType: "Customer",
+      },
+      TableName: "CoffeeTable",
+    });
+  });
 });

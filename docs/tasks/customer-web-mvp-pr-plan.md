@@ -445,7 +445,35 @@ Acceptance:
 - Workflow deploys CDK with `--require-approval never` through `pnpm infra:deploy:ci`.
 - Runbook documents required GitHub secret and variables.
 
-## PR 20: Cognito Hosted UI Environment Wiring
+## PR 20: Cognito First-Login Customer Profile
+
+Status: implemented in this working tree.
+
+Goal: prevent first Google login from failing when the Cognito customer profile has not been manually seeded yet.
+
+Files:
+
+- `services/api/src/modules/customer/customerRepository.ts`
+- `services/api/src/modules/customer/customerService.ts`
+- `services/api/src/modules/customer/customerService.test.ts`
+- `services/api/src/modules/customer/memoryCustomerRepository.ts`
+- `services/api/src/modules/customer/dynamodb/dynamoCustomerRepository.ts`
+- `services/api/src/modules/customer/dynamodb/dynamoCustomerRepository.test.ts`
+- `services/api/src/http/router.ts`
+- `services/api/src/http/router.test.ts`
+- `docs/auth.md`
+- `docs/data-model.md`
+- `docs/tasks/customer-web-mvp-pr-plan.md`
+
+Acceptance:
+
+- `/v1/me` passes Cognito `sub`, `email`, and `name` claims into the customer service.
+- DynamoDB adapter returns an existing customer profile without overwriting it.
+- DynamoDB adapter conditionally creates the profile on first login when missing.
+- Manual activation remains responsible for membership creation.
+- Tests cover service, router, and DynamoDB first-login profile behavior.
+
+## PR 21: Cognito Hosted UI Environment Wiring
 
 Goal: provision Cognito User Pool, Google IdP, and app client settings with AWS CDK.
 
@@ -457,7 +485,7 @@ Files to update/create:
 - `apps/customer-web/src/pages/AuthCallbackPage.tsx`
 - `docs/auth.md`
 
-## PR 21: Subscription and Redemption API
+## PR 22: Subscription and Redemption API
 
 Goal: add customer profile, membership lookup, and redemption APIs with testable service logic.
 
@@ -468,7 +496,7 @@ Files to create:
 - `services/api/src/modules/redemptions/**`
 - `services/api/src/repositories/**`
 
-## PR 22: AWS CDK Deployment Hardening
+## PR 23: AWS CDK Deployment Hardening
 
 Goal: add deployable AWS infrastructure for Cognito, API Gateway, Lambda, and DynamoDB.
 
@@ -481,7 +509,7 @@ Files to create:
 - `infra/cdk/lib/constructs/api.construct.ts`
 - `infra/cdk/lib/constructs/database.construct.ts`
 
-## PR 23: Admin Manual Activation
+## PR 24: Admin Manual Activation
 
 Goal: add admin web and APIs for cafe setup, plan setup, and manual membership activation.
 
