@@ -379,7 +379,29 @@ Acceptance:
 - Runtime config never accepts `VITE_DEV_ACCESS_TOKEN`.
 - CDK publishes `/config.json` with API base URL, Cognito domain, Cognito client ID, redirect URI, app name, and `useMockApi=false`.
 
-## PR 17: Cognito Hosted UI Environment Wiring
+## PR 17: Dev Deployment Runbook and Scripts
+
+Status: implemented in this working tree.
+
+Goal: provide the concrete operator path to deploy the customer MVP to `dev.mycaffe.in` once AWS credentials, certificates, Google OAuth, and DNS are ready.
+
+Files:
+
+- `package.json`
+- `infra/cdk/package.json`
+- `docs/deployment-dev.md`
+- `docs/infrastructure.md`
+- `README.md`
+
+Acceptance:
+
+- Root package exposes `pnpm infra:diff` and `pnpm infra:deploy`.
+- CDK package exposes `pnpm diff` and `pnpm deploy`.
+- Runbook documents required AWS/domain/Google/certificate environment.
+- Runbook documents DNS options for management-account DNS versus delegated hosted zone.
+- Runbook documents manual customer activation and customer smoke test steps.
+
+## PR 18: Cognito Hosted UI Environment Wiring
 
 Goal: provision Cognito User Pool, Google IdP, and app client settings with AWS CDK.
 
@@ -391,7 +413,7 @@ Files to update/create:
 - `apps/customer-web/src/pages/AuthCallbackPage.tsx`
 - `docs/auth.md`
 
-## PR 18: Subscription and Redemption API
+## PR 19: Subscription and Redemption API
 
 Goal: add customer profile, membership lookup, and redemption APIs with testable service logic.
 
@@ -402,7 +424,7 @@ Files to create:
 - `services/api/src/modules/redemptions/**`
 - `services/api/src/repositories/**`
 
-## PR 19: AWS CDK Deployment Hardening
+## PR 20: AWS CDK Deployment Hardening
 
 Goal: add deployable AWS infrastructure for Cognito, API Gateway, Lambda, and DynamoDB.
 
@@ -415,7 +437,7 @@ Files to create:
 - `infra/cdk/lib/constructs/api.construct.ts`
 - `infra/cdk/lib/constructs/database.construct.ts`
 
-## PR 20: Admin Manual Activation
+## PR 21: Admin Manual Activation
 
 Goal: add admin web and APIs for cafe setup, plan setup, and manual membership activation.
 

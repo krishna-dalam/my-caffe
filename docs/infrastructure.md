@@ -26,6 +26,8 @@ pnpm infra:synth
 
 CDK also deploys a runtime config file for the customer web app at `/config.json`. This lets the static Vite build read the deployed API URL and Cognito client ID at runtime instead of requiring those values during `pnpm build`.
 
+For the full dev deployment sequence, see [deployment-dev.md](deployment-dev.md).
+
 ## Environment
 
 ```sh
