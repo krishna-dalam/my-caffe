@@ -473,7 +473,33 @@ Acceptance:
 - Manual activation remains responsible for membership creation.
 - Tests cover service, router, and DynamoDB first-login profile behavior.
 
-## PR 21: Cognito Hosted UI Environment Wiring
+## PR 21: Cafe QR Display Route
+
+Status: implemented in this working tree.
+
+Goal: support the first step of the MVP flow by giving cafes a displayable QR page that points customers to the scan/redemption route.
+
+Files:
+
+- `apps/customer-web/package.json`
+- `apps/customer-web/src/App.tsx`
+- `apps/customer-web/src/pages/QrDisplayPage.tsx`
+- `apps/customer-web/src/pages/QrDisplayPage.test.ts`
+- `apps/customer-web/src/styles/app.css`
+- `README.md`
+- `docs/deployment-dev.md`
+- `docs/tasks/customer-web-mvp-pr-plan.md`
+- `pnpm-lock.yaml`
+
+Acceptance:
+
+- `/qr/:slug` renders a cafe-facing QR display page.
+- The QR encodes `/c/:slug` on the current origin.
+- The QR is rendered as SVG without depending on canvas.
+- The customer scan URL is visible as text for fallback.
+- Tests cover scan URL generation and slug encoding.
+
+## PR 22: Cognito Hosted UI Environment Wiring
 
 Goal: provision Cognito User Pool, Google IdP, and app client settings with AWS CDK.
 
@@ -485,7 +511,7 @@ Files to update/create:
 - `apps/customer-web/src/pages/AuthCallbackPage.tsx`
 - `docs/auth.md`
 
-## PR 22: Subscription and Redemption API
+## PR 23: Subscription and Redemption API
 
 Goal: add customer profile, membership lookup, and redemption APIs with testable service logic.
 
@@ -496,7 +522,7 @@ Files to create:
 - `services/api/src/modules/redemptions/**`
 - `services/api/src/repositories/**`
 
-## PR 23: AWS CDK Deployment Hardening
+## PR 24: AWS CDK Deployment Hardening
 
 Goal: add deployable AWS infrastructure for Cognito, API Gateway, Lambda, and DynamoDB.
 
@@ -509,7 +535,7 @@ Files to create:
 - `infra/cdk/lib/constructs/api.construct.ts`
 - `infra/cdk/lib/constructs/database.construct.ts`
 
-## PR 24: Admin Manual Activation
+## PR 25: Admin Manual Activation
 
 Goal: add admin web and APIs for cafe setup, plan setup, and manual membership activation.
 

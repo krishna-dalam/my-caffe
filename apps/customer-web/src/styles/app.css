@@ -296,6 +296,78 @@ button {
   margin: 14px 0 0;
 }
 
+.qr-display-shell {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 24px;
+}
+
+.qr-display-panel {
+  align-items: center;
+  background: #fffaf2;
+  border: 1px solid #e9dcc8;
+  border-radius: 8px;
+  display: grid;
+  gap: 24px;
+  justify-items: center;
+  max-width: 640px;
+  padding: clamp(24px, 6vw, 48px);
+  text-align: center;
+  width: 100%;
+}
+
+.qr-display-panel h1 {
+  font-size: clamp(2.25rem, 8vw, 4.5rem);
+  line-height: 1;
+  margin: 0;
+}
+
+.qr-copy {
+  color: #6a5a48;
+  font-size: 1.05rem;
+  margin: 14px auto 0;
+  max-width: 420px;
+}
+
+.qr-card {
+  align-items: center;
+  background: white;
+  border: 1px solid #eadcc8;
+  border-radius: 8px;
+  display: flex;
+  justify-content: center;
+  min-height: 320px;
+  padding: 20px;
+  width: min(100%, 360px);
+}
+
+.qr-code,
+.qr-code svg {
+  display: block;
+  height: auto;
+  max-width: 100%;
+}
+
+.qr-url {
+  display: grid;
+  gap: 6px;
+  max-width: 100%;
+}
+
+.qr-url span {
+  color: #7b5c36;
+  font-size: 0.78rem;
+  font-weight: 800;
+  text-transform: uppercase;
+}
+
+.qr-url strong {
+  color: #176b52;
+  overflow-wrap: anywhere;
+}
+
 @media (max-width: 760px) {
   .page-shell {
     padding: 16px;

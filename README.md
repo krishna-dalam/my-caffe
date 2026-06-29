@@ -30,6 +30,8 @@ pnpm dev:customer
 
 Then open the printed Vite URL and visit `/c/blue-bottle-demo`.
 
+To display a cafe QR for customers to scan, visit `/qr/blue-bottle-demo`.
+
 To run the local API skeleton:
 
 ```sh

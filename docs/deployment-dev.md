@@ -142,12 +142,13 @@ pnpm activate:customer \
 
 ## Smoke Test
 
-1. Open `https://dev.mycaffe.in/c/blue-bottle-demo`.
-2. Continue with Google.
-3. Redeem one coffee.
-4. Confirm a 4-digit verification code appears.
-5. Confirm remaining coffee count decreases by one.
-6. Refresh and confirm redemption history remains visible.
+1. Open `https://dev.mycaffe.in/qr/blue-bottle-demo`.
+2. Scan the QR code and confirm it opens `https://dev.mycaffe.in/c/blue-bottle-demo`.
+3. Continue with Google.
+4. Redeem one coffee.
+5. Confirm a 4-digit verification code appears.
+6. Confirm remaining coffee count decreases by one.
+7. Refresh and confirm redemption history remains visible.
 
 ## Current Limitation
 
