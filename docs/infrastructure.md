@@ -62,7 +62,7 @@ Recommended dev hostnames:
 Because the hosted zone is in the management account, there are two safe options:
 
 1. Delegate `dev.mycaffe.in` to a hosted zone in the dev account. Then set `HOSTED_ZONE_ID` and `HOSTED_ZONE_NAME=dev.mycaffe.in` for CDK so it can create records.
-2. Keep DNS in the management account. In that case, provide certificate ARNs to CDK and create the `dev.mycaffe.in` and `api.dev.mycaffe.in` DNS records from the management account using CDK outputs.
+2. Keep DNS in the management account. In that case, provide certificate ARNs to CDK and create the `dev.mycaffe.in` and `api.dev.mycaffe.in` DNS records from the management account using CDK outputs. Use `CustomerWebDistributionDomainName` for the web record and `CustomerApiRegionalDomainName` plus `CustomerApiRegionalHostedZoneId` for the API record.
 
 Certificate requirements:
 

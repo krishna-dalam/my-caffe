@@ -132,7 +132,12 @@ When `HOSTED_ZONE_ID` is configured, CDK creates Route 53 alias records.
 When DNS remains in the management account, create these records manually:
 
 - `dev.mycaffe.in` -> CloudFront distribution domain from `CustomerWebDistributionDomainName`
-- `api.dev.mycaffe.in` -> API Gateway regional domain target shown in the API Gateway custom domain console
+- `api.dev.mycaffe.in` -> API Gateway regional domain from `CustomerApiRegionalDomainName`
+
+If the DNS provider supports alias records, use the hosted zone IDs from the outputs:
+
+- CloudFront alias hosted zone ID: `Z2FDTNDATAQYW2`
+- API Gateway alias hosted zone ID: `CustomerApiRegionalHostedZoneId`
 
 ## Manual Customer Activation
 

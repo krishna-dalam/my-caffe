@@ -613,7 +613,29 @@ Acceptance:
 - Protected history and redemption requests still use normal API error handling.
 - Tests cover token availability detection.
 
-## PR 27: Admin Manual Activation
+## PR 27: Manual DNS Deployment Outputs
+
+Status: implemented in this working tree.
+
+Goal: make management-account DNS setup possible from CDK outputs without opening the API Gateway console.
+
+Files:
+
+- `infra/cdk/lib/constructs/api.construct.ts`
+- `infra/cdk/lib/coffee-subscription-stack.ts`
+- `docs/deployment-dev.md`
+- `docs/infrastructure.md`
+- `docs/tasks/customer-web-mvp-pr-plan.md`
+
+Acceptance:
+
+- API custom domain exposes its regional domain name through the CDK construct.
+- Stack outputs include `CustomerApiRegionalDomainName` when the API custom domain is configured.
+- Stack outputs include `CustomerApiRegionalHostedZoneId` when the API custom domain is configured.
+- Manual DNS docs use CDK outputs for both web and API records.
+- The management-account DNS path no longer requires looking up API Gateway custom domain details in the console.
+
+## PR 28: Admin Manual Activation
 
 Goal: add admin web and APIs for cafe setup, plan setup, and manual membership activation.
 

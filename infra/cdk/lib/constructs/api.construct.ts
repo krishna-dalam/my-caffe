@@ -24,6 +24,7 @@ interface ApiConstructProps {
 
 export class ApiConstruct extends Construct {
   readonly api: apigatewayv2.HttpApi;
+  readonly customDomain?: apigatewayv2.DomainName;
   readonly handler: lambda.Function;
 
   constructor(scope: Construct, id: string, props: ApiConstructProps) {
@@ -100,6 +101,7 @@ export class ApiConstruct extends Construct {
         certificate: acm.Certificate.fromCertificateArn(this, "CustomerApiCertificate", props.certificateArn),
         domainName: props.domainName,
       });
+      this.customDomain = domainName;
 
       new apigatewayv2.ApiMapping(this, "CustomerApiMapping", {
         api: this.api,

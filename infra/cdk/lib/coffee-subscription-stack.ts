@@ -77,6 +77,14 @@ export class CoffeeSubscriptionStack extends cdk.Stack {
     new cdk.CfnOutput(this, "CustomerApiDomainName", {
       value: config.apiDomainName,
     });
+    if (api.customDomain) {
+      new cdk.CfnOutput(this, "CustomerApiRegionalDomainName", {
+        value: api.customDomain.regionalDomainName,
+      });
+      new cdk.CfnOutput(this, "CustomerApiRegionalHostedZoneId", {
+        value: api.customDomain.regionalHostedZoneId,
+      });
+    }
     new cdk.CfnOutput(this, "CustomerUserPoolId", {
       value: auth.userPool.userPoolId,
     });
