@@ -32,8 +32,10 @@ export class AuthConstruct extends Construct {
 
     const supportedIdentityProviders = [cognito.UserPoolClientIdentityProvider.COGNITO];
 
+    let googleProvider: cognito.UserPoolIdentityProviderGoogle | undefined;
+
     if (props.googleClientId && props.googleClientSecretName) {
-      const googleProvider = new cognito.UserPoolIdentityProviderGoogle(this, "GoogleIdentityProvider", {
+      googleProvider = new cognito.UserPoolIdentityProviderGoogle(this, "GoogleIdentityProvider", {
         attributeMapping: {
           email: cognito.ProviderAttribute.GOOGLE_EMAIL,
           fullname: cognito.ProviderAttribute.GOOGLE_NAME,
@@ -65,6 +67,10 @@ export class AuthConstruct extends Construct {
       supportedIdentityProviders,
       userPool: this.userPool,
     });
+
+    if (googleProvider) {
+      this.userPoolClient.node.addDependency(googleProvider);
+    }
 
     if (props.cognitoDomainPrefix) {
       this.userPool.addDomain("HostedUiDomain", {
