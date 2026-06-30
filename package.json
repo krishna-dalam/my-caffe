@@ -11,6 +11,7 @@
     "infra:deploy": "pnpm --filter @my-caffe/infra-cdk deploy",
     "infra:deploy:ci": "pnpm --filter @my-caffe/infra-cdk deploy:ci",
     "infra:diff": "pnpm --filter @my-caffe/infra-cdk diff",
+    "infra:preflight:dev": "pnpm --filter @my-caffe/infra-cdk preflight:dev",
     "infra:synth": "pnpm --filter @my-caffe/infra-cdk synth",
     "lint": "pnpm -r lint",
     "test": "pnpm -r test",

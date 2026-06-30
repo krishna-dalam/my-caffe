@@ -51,6 +51,7 @@ export HOSTED_ZONE_NAME="dev.mycaffe.in"
 ```
 
 If DNS stays in the management account, leave `HOSTED_ZONE_ID` empty and create the DNS records manually from CDK outputs.
+Leave `HOSTED_ZONE_NAME` empty as well unless `HOSTED_ZONE_ID` is set.
 
 ## Google OAuth Callback
 
@@ -76,6 +77,12 @@ pnpm build
 pnpm typecheck
 pnpm lint
 pnpm test
+```
+
+Validate deployment configuration before waiting on CDK:
+
+```sh
+pnpm infra:preflight:dev
 ```
 
 Review infrastructure changes:

@@ -566,43 +566,33 @@ Acceptance:
 - `/c/:slug` QR scan routes are preserved through login.
 - Tests cover safe and unsafe return path normalization.
 
-## PR 25: Cognito Hosted UI Environment Wiring
+## PR 25: Dev Deploy Preflight
 
-Goal: provision Cognito User Pool, Google IdP, and app client settings with AWS CDK.
+Status: implemented in this working tree.
 
-Files to update/create:
+Goal: fail fast when the dev deployment environment is missing required domain, certificate, OAuth, or account values.
 
-- `apps/customer-web/.env.example`
-- `apps/customer-web/src/auth/cognito.ts`
-- `apps/customer-web/src/auth/AuthProvider.tsx`
-- `apps/customer-web/src/pages/AuthCallbackPage.tsx`
-- `docs/auth.md`
+Files:
 
-## PR 26: Subscription and Redemption API
-
-Goal: add customer profile, membership lookup, and redemption APIs with testable service logic.
-
-Files to create:
-
-- `services/api/src/modules/customers/**`
-- `services/api/src/modules/memberships/**`
-- `services/api/src/modules/redemptions/**`
-- `services/api/src/repositories/**`
-
-## PR 27: AWS CDK Deployment Hardening
-
-Goal: add deployable AWS infrastructure for Cognito, API Gateway, Lambda, and DynamoDB.
-
-Files to create:
-
+- `infra/cdk/scripts/validateDevDeployEnv.ts`
 - `infra/cdk/package.json`
-- `infra/cdk/bin/app.ts`
-- `infra/cdk/lib/coffee-subscription-stack.ts`
-- `infra/cdk/lib/constructs/auth.construct.ts`
-- `infra/cdk/lib/constructs/api.construct.ts`
-- `infra/cdk/lib/constructs/database.construct.ts`
+- `infra/cdk/tsconfig.json`
+- `infra/cdk/.env.example`
+- `package.json`
+- `docs/deployment-dev.md`
+- `docs/tasks/customer-web-mvp-pr-plan.md`
 
-## PR 28: Admin Manual Activation
+Acceptance:
+
+- `pnpm infra:preflight:dev` validates required dev deployment variables.
+- Deploy commands run preflight before CDK synth/deploy.
+- CloudFront certificate ARN must be in `us-east-1`.
+- API certificate ARN must match the dev deployment region.
+- `ALLOWED_ORIGIN` must match the configured web domain.
+- Hosted zone variables must be provided as a pair or omitted for manual DNS.
+- Preflight output does not print OAuth client secrets.
+
+## PR 26: Admin Manual Activation
 
 Goal: add admin web and APIs for cafe setup, plan setup, and manual membership activation.
 
