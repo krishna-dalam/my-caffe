@@ -592,7 +592,28 @@ Acceptance:
 - Hosted zone variables must be provided as a pair or omitted for manual DNS.
 - Preflight output does not print OAuth client secrets.
 
-## PR 26: Admin Manual Activation
+## PR 26: Skip Unauthenticated Customer Probe
+
+Status: implemented in this working tree.
+
+Goal: avoid calling protected customer APIs during the first unauthenticated QR landing page load.
+
+Files:
+
+- `apps/customer-web/src/api/authToken.ts`
+- `apps/customer-web/src/api/authToken.test.ts`
+- `apps/customer-web/src/api/coffeeApi.ts`
+- `docs/tasks/customer-web-mvp-pr-plan.md`
+
+Acceptance:
+
+- Real API mode returns `null` for the current customer when no Hosted UI or dev token exists.
+- QR landing can show the guest/login state without first producing a backend 401.
+- Hosted UI tokens and dev tokens are still detected as usable request credentials.
+- Protected history and redemption requests still use normal API error handling.
+- Tests cover token availability detection.
+
+## PR 27: Admin Manual Activation
 
 Goal: add admin web and APIs for cafe setup, plan setup, and manual membership activation.
 

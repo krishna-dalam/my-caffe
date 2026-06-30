@@ -11,7 +11,7 @@ import {
   startGoogleLogin,
 } from "../auth/cognito";
 import { env } from "../config/env";
-import { chooseRequestAccessToken } from "./authToken";
+import { chooseRequestAccessToken, hasRequestAccessToken } from "./authToken";
 import { jsonRequest } from "./httpClient";
 import { mockCoffeeApi } from "./mockCoffeeApi";
 
@@ -42,7 +42,18 @@ const realJsonRequest = async <T>(path: string, init?: RequestInit): Promise<T> 
 
 const realCoffeeApi: CoffeeApi = {
   getCafeLanding: (slug) => realJsonRequest<CafeLandingView>(`/cafes/${slug}`),
-  getCurrentCustomer: () => realJsonRequest<Customer | null>("/me"),
+  getCurrentCustomer: () => {
+    if (
+      !hasRequestAccessToken({
+        devAccessToken: env.devAccessToken,
+        hostedUiAccessToken: getAccessToken(),
+      })
+    ) {
+      return Promise.resolve(null);
+    }
+
+    return realJsonRequest<Customer | null>("/me");
+  },
   getRedemptions: (cafeId) => realJsonRequest<Redemption[]>(`/me/redemptions?cafeId=${encodeURIComponent(cafeId)}`),
   completeLoginRedirect: () => {
     if (env.devAccessToken) {
