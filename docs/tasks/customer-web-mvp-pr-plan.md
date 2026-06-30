@@ -699,7 +699,33 @@ Acceptance:
 - Smoke step verifies the default `blue-bottle-demo` QR cafe slug.
 - Runbook reflects the post-deploy smoke gate.
 
-## PR 31: Admin Manual Activation
+## PR 31: Dev Customer Lookup Helper
+
+Status: implemented in this working tree.
+
+Goal: make manual dev activation practical after first Google login by finding the Cognito customer ID from the stored customer profile email.
+
+Files:
+
+- `services/api/src/modules/customer/customerLookup.ts`
+- `services/api/src/modules/customer/customerLookup.test.ts`
+- `services/api/src/scripts/findCustomer.ts`
+- `services/api/package.json`
+- `package.json`
+- `docs/deployment-dev.md`
+- `docs/data-model.md`
+- `docs/tasks/customer-web-mvp-pr-plan.md`
+
+Acceptance:
+
+- `pnpm find:customer --email customer@example.com` scans dev customer profiles by email.
+- Lookup prints the customer ID needed by `pnpm activate:customer`.
+- Lookup fails clearly when the customer has not signed in yet.
+- Duplicate profiles for the same email are rejected instead of picking one silently.
+- Tests cover scan input shape, normalization, matching, no-match, and duplicate handling.
+- Docs call out that this is an operator-only dev helper, not a production email index.
+
+## PR 32: Admin Manual Activation
 
 Goal: add admin web and APIs for cafe setup, plan setup, and manual membership activation.
 

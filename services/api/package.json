@@ -8,6 +8,7 @@
     "activate:customer": "tsx src/scripts/activateCustomer.ts",
     "build": "tsc -p tsconfig.json",
     "dev": "tsx src/localServer.ts",
+    "find:customer": "tsx src/scripts/findCustomer.ts",
     "lint": "tsc -p tsconfig.json --noEmit",
     "test": "vitest run",
     "typecheck": "tsc -p tsconfig.json --noEmit"

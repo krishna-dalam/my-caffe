@@ -193,7 +193,15 @@ pnpm smoke:dev
 
 ## Manual Customer Activation
 
-After a customer signs in once, find their Cognito `sub` and activate the dev subscription:
+After a customer signs in once, find their Cognito `sub` from the customer profile:
+
+```sh
+COFFEE_TABLE_NAME="value-from-CoffeeTableName-output" \
+AWS_REGION="ap-south-1" \
+pnpm find:customer --email "customer@example.com"
+```
+
+Then activate the dev subscription:
 
 ```sh
 COFFEE_TABLE_NAME="value-from-CoffeeTableName-output" \

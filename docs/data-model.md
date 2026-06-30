@@ -52,3 +52,5 @@ The DynamoDB adapter commits redemptions with a transaction:
 This prevents duplicated redemption records and avoids overwriting a concurrent membership update.
 
 Manual dev activation is available through `pnpm activate:customer`. It writes the cafe slug lookup, cafe profile, customer profile, and active membership records needed for a Cognito-authenticated customer to redeem coffee before the admin app exists. If the customer has already logged in, the customer profile may already exist; the script skips existing cafe/customer records but still protects membership records from accidental overwrite.
+
+To find a first-login customer profile by email during dev setup, use `pnpm find:customer --email customer@example.com`. This is an operator-only helper that scans customer profile records so the MVP does not need an email lookup index before the admin workflow exists.

@@ -8,6 +8,7 @@
     "build": "pnpm -r build",
     "dev:api": "pnpm --filter @my-caffe/api dev",
     "dev:customer": "pnpm --filter @my-caffe/customer-web dev",
+    "find:customer": "pnpm --filter @my-caffe/api find:customer",
     "infra:deploy": "pnpm --filter @my-caffe/infra-cdk deploy",
     "infra:deploy:ci": "pnpm --filter @my-caffe/infra-cdk deploy:ci",
     "infra:diff": "pnpm --filter @my-caffe/infra-cdk diff",
