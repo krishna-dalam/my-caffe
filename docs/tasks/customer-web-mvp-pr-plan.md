@@ -635,7 +635,30 @@ Acceptance:
 - Manual DNS docs use CDK outputs for both web and API records.
 - The management-account DNS path no longer requires looking up API Gateway custom domain details in the console.
 
-## PR 28: Admin Manual Activation
+## PR 28: Public Dev Smoke Check
+
+Status: implemented in this working tree.
+
+Goal: provide a repeatable command to verify public deployed web and API surfaces after DNS resolves.
+
+Files:
+
+- `infra/cdk/scripts/smokeDevDeployment.ts`
+- `infra/cdk/package.json`
+- `package.json`
+- `docs/deployment-dev.md`
+- `docs/tasks/customer-web-mvp-pr-plan.md`
+
+Acceptance:
+
+- `pnpm smoke:dev` checks deployed `/config.json`.
+- Smoke check verifies runtime config uses the deployed API and Cognito values.
+- Smoke check verifies API health returns the expected success envelope.
+- Smoke check verifies unauthenticated cafe landing for the QR slug.
+- Smoke command supports URL and cafe slug overrides through environment variables.
+- Dry-run mode validates smoke configuration without network calls.
+
+## PR 29: Admin Manual Activation
 
 Goal: add admin web and APIs for cafe setup, plan setup, and manual membership activation.
 

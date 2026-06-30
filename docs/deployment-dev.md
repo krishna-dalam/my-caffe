@@ -139,6 +139,29 @@ If the DNS provider supports alias records, use the hosted zone IDs from the out
 - CloudFront alias hosted zone ID: `Z2FDTNDATAQYW2`
 - API Gateway alias hosted zone ID: `CustomerApiRegionalHostedZoneId`
 
+## Public Smoke Check
+
+After DNS resolves, validate the deployed public surfaces:
+
+```sh
+pnpm smoke:dev
+```
+
+The command checks:
+
+- `https://dev.mycaffe.in/config.json`
+- `https://api.dev.mycaffe.in/v1/health`
+- `https://api.dev.mycaffe.in/v1/cafes/blue-bottle-demo`
+
+Override defaults when needed:
+
+```sh
+SMOKE_WEB_BASE_URL="https://dev.mycaffe.in" \
+SMOKE_API_BASE_URL="https://api.dev.mycaffe.in/v1" \
+SMOKE_CAFE_SLUG="blue-bottle-demo" \
+pnpm smoke:dev
+```
+
 ## Manual Customer Activation
 
 After a customer signs in once, find their Cognito `sub` and activate the dev subscription:
