@@ -87,6 +87,8 @@ Validate deployment configuration before waiting on CDK:
 pnpm infra:preflight:dev
 ```
 
+For offline config-only validation, set `SKIP_AWS_IDENTITY_CHECK=true`. Do not use that skip for actual deploys.
+
 Review infrastructure changes:
 
 ```sh

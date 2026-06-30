@@ -745,7 +745,28 @@ Acceptance:
 - Checklist includes the exact commands for policy generation, preflight, smoke testing, customer lookup, and activation.
 - Runbook and README link to the checklist.
 
-## PR 33: Admin Manual Activation
+## PR 33: AWS Identity Preflight
+
+Status: implemented in this working tree.
+
+Goal: fail fast when local or GitHub deploy credentials do not resolve to the configured dev AWS account.
+
+Files:
+
+- `infra/cdk/scripts/validateDevDeployEnv.ts`
+- `docs/deployment-dev.md`
+- `docs/dev-launch-checklist.md`
+- `docs/tasks/customer-web-mvp-pr-plan.md`
+
+Acceptance:
+
+- `pnpm infra:preflight:dev` calls `aws sts get-caller-identity`.
+- Preflight fails if AWS credentials are invalid.
+- Preflight fails if STS account differs from `CDK_DEFAULT_ACCOUNT`.
+- Offline config-only validation can explicitly set `SKIP_AWS_IDENTITY_CHECK=true`.
+- Docs make clear the skip must not be used for real deploys.
+
+## PR 34: Admin Manual Activation
 
 Goal: add admin web and APIs for cafe setup, plan setup, and manual membership activation.
 

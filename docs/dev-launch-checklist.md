@@ -92,7 +92,7 @@ If DNS stays in the management account, leave `DEV_HOSTED_ZONE_ID` and `DEV_HOST
 pnpm infra:preflight:dev
 ```
 
-- [ ] Confirm preflight passes.
+- [ ] Confirm preflight passes, including the AWS identity check.
 - [ ] Confirm `pnpm infra:diff` shows expected dev resources only.
 
 ## 6. Deploy

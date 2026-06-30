@@ -1,3 +1,5 @@
+import { execFileSync } from "node:child_process";
+
 const requiredEnvVars = [
   "ALLOWED_ORIGIN",
   "API_CERTIFICATE_ARN",
@@ -35,6 +37,26 @@ const certificateRegionFromArn = (arn: string): string | undefined => {
 
 const validateCognitoDomainPrefix = (prefix: string): boolean =>
   /^[a-z0-9](?:[a-z0-9-]{1,61}[a-z0-9])?$/.test(prefix);
+
+const shouldSkipAwsIdentityCheck = (): boolean => readEnv("SKIP_AWS_IDENTITY_CHECK") === "true";
+
+const readAwsIdentityAccount = (): string => {
+  try {
+    const output = execFileSync("aws", ["sts", "get-caller-identity", "--output", "json"], {
+      encoding: "utf8",
+      stdio: ["ignore", "pipe", "pipe"],
+    });
+    const identity = JSON.parse(output) as { Account?: unknown };
+    if (typeof identity.Account === "string" && /^\d{12}$/.test(identity.Account)) {
+      return identity.Account;
+    }
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "unknown error";
+    throw new Error(`AWS credentials are not valid for deployment: ${message}`);
+  }
+
+  throw new Error("AWS credentials are not valid for deployment: unable to read AWS account from STS.");
+};
 
 const errors: string[] = [];
 
@@ -111,6 +133,17 @@ if (hostedZoneName && rootDomainName && hostedZoneName !== rootDomainName && !ho
   errors.push("HOSTED_ZONE_NAME must be ROOT_DOMAIN_NAME or one of its subdomains.");
 }
 
+if (!shouldSkipAwsIdentityCheck()) {
+  try {
+    const awsAccount = readAwsIdentityAccount();
+    if (account && awsAccount !== account) {
+      errors.push(`AWS credentials resolve to account ${awsAccount}, but CDK_DEFAULT_ACCOUNT is ${account}.`);
+    }
+  } catch (error) {
+    errors.push(error instanceof Error ? error.message : "AWS credentials are not valid for deployment.");
+  }
+}
+
 if (errors.length > 0) {
   console.error("Dev deploy preflight failed:");
   for (const error of errors) {
@@ -124,4 +157,5 @@ console.log(`- Web domain: ${webDomainName}`);
 console.log(`- API domain: ${apiDomainName}`);
 console.log(`- AWS account: ${account}`);
 console.log(`- AWS region: ${region}`);
+console.log(`- AWS identity check: ${shouldSkipAwsIdentityCheck() ? "skipped" : "passed"}`);
 console.log(`- DNS mode: ${hostedZoneId ? "Route 53 records managed by CDK" : "manual DNS records"}`);
