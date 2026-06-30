@@ -1,5 +1,6 @@
 import { CafePage } from "./pages/CafePage";
 import { AuthCallbackPage } from "./pages/AuthCallbackPage";
+import { HomePage } from "./pages/HomePage";
 import { QrDisplayPage } from "./pages/QrDisplayPage";
 import "./styles/app.css";
 
@@ -12,5 +13,9 @@ export function App() {
     return <QrDisplayPage />;
   }
 
-  return <CafePage />;
+  if (window.location.pathname.startsWith("/c/")) {
+    return <CafePage />;
+  }
+
+  return <HomePage />;
 }
