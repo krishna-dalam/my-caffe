@@ -684,7 +684,7 @@ Acceptance:
 
 Status: implemented in this working tree.
 
-Goal: make the manual dev GitHub deployment fail visibly if public web/API smoke checks do not pass after CDK deploy.
+Goal: make the manual dev GitHub deployment able to fail visibly if public web/API smoke checks do not pass after CDK deploy.
 
 Files:
 
@@ -694,7 +694,7 @@ Files:
 
 Acceptance:
 
-- `Deploy Dev` runs `pnpm smoke:dev` after `pnpm infra:deploy:ci`.
+- `Deploy Dev` can run `pnpm smoke:dev` after `pnpm infra:deploy:ci`.
 - Smoke step uses `https://dev.mycaffe.in` and `https://api.dev.mycaffe.in/v1`.
 - Smoke step verifies the default `blue-bottle-demo` QR cafe slug.
 - Runbook reflects the post-deploy smoke gate.
