@@ -140,6 +140,8 @@ pnpm activate:customer \
   --customer-name "Customer Name"
 ```
 
+The script is safe to run after first login: existing cafe and customer profile records are skipped by default. Existing membership records are not overwritten unless you pass `--overwrite`.
+
 ## Smoke Test
 
 1. Open `https://dev.mycaffe.in/qr/blue-bottle-demo`.

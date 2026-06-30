@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { createManualActivationItems } from "./manualActivation.js";
+import { canIgnoreExistingActivationItem, createManualActivationItems } from "./manualActivation.js";
 
 describe("manual activation items", () => {
   it("creates cafe, customer, and membership records for a Cognito customer", () => {
@@ -48,5 +48,19 @@ describe("manual activation items", () => {
       remainingCoffees: 8,
       status: "active",
     });
+  });
+
+  it("allows existing cafe and customer seed records but not memberships", () => {
+    expect(canIgnoreExistingActivationItem({ PK: "CAFE#cafe_001", SK: "PROFILE", entityType: "Cafe" })).toBe(true);
+    expect(canIgnoreExistingActivationItem({ PK: "CUSTOMER#customer_001", SK: "PROFILE", entityType: "Customer" })).toBe(
+      true,
+    );
+    expect(
+      canIgnoreExistingActivationItem({
+        PK: "CUSTOMER#customer_001",
+        SK: "MEMBERSHIP#membership_001",
+        entityType: "Membership",
+      }),
+    ).toBe(false);
   });
 });

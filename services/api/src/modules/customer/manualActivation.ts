@@ -18,6 +18,8 @@ export interface ManualActivationInput {
 
 export type ActivationItem = Record<string, string | number | boolean>;
 
+export const canIgnoreExistingActivationItem = (item: ActivationItem): boolean => item.entityType !== "Membership";
+
 const toCafeItem = (cafe: Cafe, key: { pk: string; sk: string }): ActivationItem => ({
   ...cafe,
   PK: key.pk,

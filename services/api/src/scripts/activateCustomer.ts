@@ -1,7 +1,12 @@
-import { PutCommand } from "@aws-sdk/lib-dynamodb";
+import { PutCommand, type DynamoDBDocumentClient } from "@aws-sdk/lib-dynamodb";
 import { env } from "../config/env.js";
 import { createDynamoDocumentClient } from "../db/dynamodbClient.js";
-import { createManualActivationItems, type ManualActivationInput } from "../modules/customer/manualActivation.js";
+import {
+  canIgnoreExistingActivationItem,
+  createManualActivationItems,
+  type ActivationItem,
+  type ManualActivationInput,
+} from "../modules/customer/manualActivation.js";
 
 interface CliOptions {
   overwrite: boolean;
@@ -80,6 +85,41 @@ const toActivationInput = (options: CliOptions): ManualActivationInput => ({
   planName: readOption(options, "plan-name", "ACTIVATION_PLAN_NAME", "Monthly 8 Coffee Pass"),
 });
 
+const isConditionalCheckFailed = (error: unknown): boolean =>
+  typeof error === "object" &&
+  error !== null &&
+  "name" in error &&
+  (error as { name?: unknown }).name === "ConditionalCheckFailedException";
+
+const putActivationItem = async ({
+  client,
+  item,
+  overwrite,
+  tableName,
+}: {
+  client: DynamoDBDocumentClient;
+  item: ActivationItem;
+  overwrite: boolean;
+  tableName: string;
+}): Promise<void> => {
+  try {
+    await client.send(
+      new PutCommand({
+        ConditionExpression: overwrite ? undefined : "attribute_not_exists(PK) AND attribute_not_exists(SK)",
+        Item: item,
+        TableName: tableName,
+      }),
+    );
+  } catch (error) {
+    if (!overwrite && isConditionalCheckFailed(error) && canIgnoreExistingActivationItem(item)) {
+      console.info(`Skipped existing ${item.entityType} record ${item.PK} ${item.SK}.`);
+      return;
+    }
+
+    throw error;
+  }
+};
+
 const activateCustomer = async (): Promise<void> => {
   const options = readArgs(process.argv.slice(2));
   const tableName = env.tableName;
@@ -92,13 +132,12 @@ const activateCustomer = async (): Promise<void> => {
   const client = createDynamoDocumentClient();
 
   for (const item of items) {
-    await client.send(
-      new PutCommand({
-        ConditionExpression: options.overwrite ? undefined : "attribute_not_exists(PK) AND attribute_not_exists(SK)",
-        Item: item,
-        TableName: tableName,
-      }),
-    );
+    await putActivationItem({
+      client,
+      item,
+      overwrite: options.overwrite,
+      tableName,
+    });
   }
 
   console.info(

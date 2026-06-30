@@ -499,7 +499,31 @@ Acceptance:
 - The customer scan URL is visible as text for fallback.
 - Tests cover scan URL generation and slug encoding.
 
-## PR 22: Cognito Hosted UI Environment Wiring
+## PR 22: Idempotent Manual Activation
+
+Status: implemented in this working tree.
+
+Goal: let dev activation run after first Google login has already created the customer profile, without accidentally overwriting an active membership.
+
+Files:
+
+- `services/api/src/modules/customer/manualActivation.ts`
+- `services/api/src/modules/customer/manualActivation.test.ts`
+- `services/api/src/scripts/activateCustomer.ts`
+- `docs/auth.md`
+- `docs/data-model.md`
+- `docs/deployment-dev.md`
+- `docs/tasks/customer-web-mvp-pr-plan.md`
+
+Acceptance:
+
+- Existing cafe seed records do not block activation.
+- Existing customer profile records do not block activation.
+- Existing membership records still block activation unless `--overwrite` is explicitly passed.
+- Activation script logs skipped existing non-membership records.
+- Tests cover the activation conflict policy.
+
+## PR 23: Cognito Hosted UI Environment Wiring
 
 Goal: provision Cognito User Pool, Google IdP, and app client settings with AWS CDK.
 
@@ -511,7 +535,7 @@ Files to update/create:
 - `apps/customer-web/src/pages/AuthCallbackPage.tsx`
 - `docs/auth.md`
 
-## PR 23: Subscription and Redemption API
+## PR 24: Subscription and Redemption API
 
 Goal: add customer profile, membership lookup, and redemption APIs with testable service logic.
 
@@ -522,7 +546,7 @@ Files to create:
 - `services/api/src/modules/redemptions/**`
 - `services/api/src/repositories/**`
 
-## PR 24: AWS CDK Deployment Hardening
+## PR 25: AWS CDK Deployment Hardening
 
 Goal: add deployable AWS infrastructure for Cognito, API Gateway, Lambda, and DynamoDB.
 
@@ -535,7 +559,7 @@ Files to create:
 - `infra/cdk/lib/constructs/api.construct.ts`
 - `infra/cdk/lib/constructs/database.construct.ts`
 
-## PR 25: Admin Manual Activation
+## PR 26: Admin Manual Activation
 
 Goal: add admin web and APIs for cafe setup, plan setup, and manual membership activation.
 

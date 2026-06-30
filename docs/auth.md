@@ -131,10 +131,10 @@ pnpm activate:customer \
   --customer-name "Customer Name"
 ```
 
-The script creates:
+The script creates or reuses:
 
 - cafe profile and slug lookup records for `/c/blue-bottle-demo`
 - customer profile under `CUSTOMER#{sub}`
 - active membership with 8 coffees
 
-By default, it refuses to overwrite existing records. Use `--overwrite` only when intentionally resetting a dev customer membership.
+By default, it skips existing cafe/customer profile records but refuses to overwrite an existing membership. Use `--overwrite` only when intentionally resetting a dev customer membership.
