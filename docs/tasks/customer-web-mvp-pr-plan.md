@@ -523,7 +523,28 @@ Acceptance:
 - Activation script logs skipped existing non-membership records.
 - Tests cover the activation conflict policy.
 
-## PR 23: Cognito Hosted UI Environment Wiring
+## PR 23: Customer API Error Envelope Handling
+
+Status: implemented in this working tree.
+
+Goal: show useful backend error messages in the customer web app instead of generic HTTP status text.
+
+Files:
+
+- `apps/customer-web/src/api/coffeeApi.ts`
+- `apps/customer-web/src/api/httpClient.ts`
+- `apps/customer-web/src/api/httpClient.test.ts`
+- `docs/tasks/customer-web-mvp-pr-plan.md`
+
+Acceptance:
+
+- Real API client unwraps success envelopes.
+- Real API client reads backend error envelope messages.
+- Non-JSON error responses still fall back to HTTP status text.
+- API requests continue to include Hosted UI or dev bearer tokens.
+- Tests cover success, structured error, and fallback error handling.
+
+## PR 24: Cognito Hosted UI Environment Wiring
 
 Goal: provision Cognito User Pool, Google IdP, and app client settings with AWS CDK.
 
@@ -535,7 +556,7 @@ Files to update/create:
 - `apps/customer-web/src/pages/AuthCallbackPage.tsx`
 - `docs/auth.md`
 
-## PR 24: Subscription and Redemption API
+## PR 25: Subscription and Redemption API
 
 Goal: add customer profile, membership lookup, and redemption APIs with testable service logic.
 
@@ -546,7 +567,7 @@ Files to create:
 - `services/api/src/modules/redemptions/**`
 - `services/api/src/repositories/**`
 
-## PR 25: AWS CDK Deployment Hardening
+## PR 26: AWS CDK Deployment Hardening
 
 Goal: add deployable AWS infrastructure for Cognito, API Gateway, Lambda, and DynamoDB.
 
@@ -559,7 +580,7 @@ Files to create:
 - `infra/cdk/lib/constructs/api.construct.ts`
 - `infra/cdk/lib/constructs/database.construct.ts`
 
-## PR 26: Admin Manual Activation
+## PR 27: Admin Manual Activation
 
 Goal: add admin web and APIs for cafe setup, plan setup, and manual membership activation.
 

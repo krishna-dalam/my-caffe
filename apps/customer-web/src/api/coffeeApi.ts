@@ -12,6 +12,7 @@ import {
 } from "../auth/cognito";
 import { env } from "../config/env";
 import { chooseRequestAccessToken } from "./authToken";
+import { jsonRequest } from "./httpClient";
 import { mockCoffeeApi } from "./mockCoffeeApi";
 
 export interface CoffeeApi {
@@ -25,36 +26,24 @@ export interface CoffeeApi {
   resetDemoData(): Promise<void>;
 }
 
-const jsonRequest = async <T>(path: string, init?: RequestInit): Promise<T> => {
+const realJsonRequest = async <T>(path: string, init?: RequestInit): Promise<T> => {
   const accessToken = chooseRequestAccessToken({
     devAccessToken: env.devAccessToken,
     hostedUiAccessToken: getAccessToken(),
   });
-  const response = await fetch(`${env.apiBaseUrl}${path}`, {
-    ...init,
-    headers: {
-      ...(accessToken ? { Authorization: `Bearer ${accessToken}` } : {}),
-      "Content-Type": "application/json",
-      ...init?.headers,
-    },
+
+  return jsonRequest<T>({
+    accessToken,
+    apiBaseUrl: env.apiBaseUrl,
+    init,
+    path,
   });
-
-  if (!response.ok) {
-    throw new Error(`Request failed with status ${response.status}`);
-  }
-
-  const payload = (await response.json()) as T | { data: T };
-  if (payload && typeof payload === "object" && "data" in payload) {
-    return payload.data;
-  }
-
-  return payload;
 };
 
 const realCoffeeApi: CoffeeApi = {
-  getCafeLanding: (slug) => jsonRequest<CafeLandingView>(`/cafes/${slug}`),
-  getCurrentCustomer: () => jsonRequest<Customer | null>("/me"),
-  getRedemptions: (cafeId) => jsonRequest<Redemption[]>(`/me/redemptions?cafeId=${encodeURIComponent(cafeId)}`),
+  getCafeLanding: (slug) => realJsonRequest<CafeLandingView>(`/cafes/${slug}`),
+  getCurrentCustomer: () => realJsonRequest<Customer | null>("/me"),
+  getRedemptions: (cafeId) => realJsonRequest<Redemption[]>(`/me/redemptions?cafeId=${encodeURIComponent(cafeId)}`),
   completeLoginRedirect: () => {
     if (env.devAccessToken) {
       return Promise.resolve();
@@ -68,7 +57,7 @@ const realCoffeeApi: CoffeeApi = {
   },
   loginWithGoogle: async () => {
     if (env.devAccessToken) {
-      return jsonRequest<Customer>("/me");
+      return realJsonRequest<Customer>("/me");
     }
 
     await startGoogleLogin({
@@ -91,7 +80,7 @@ const realCoffeeApi: CoffeeApi = {
     return Promise.resolve();
   },
   redeemCoffee: (cafeId) =>
-    jsonRequest<RedeemCoffeeResponse>("/redemptions", {
+    realJsonRequest<RedeemCoffeeResponse>("/redemptions", {
       body: JSON.stringify({ cafeId }),
       method: "POST",
     }),
