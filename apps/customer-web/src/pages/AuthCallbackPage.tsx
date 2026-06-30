@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { coffeeApi } from "../api/coffeeApi";
+import { consumeAuthReturnPath } from "../auth/cognito";
 
 export function AuthCallbackPage() {
   const [error, setError] = useState<string | null>(null);
@@ -8,7 +9,7 @@ export function AuthCallbackPage() {
     const completeLogin = async () => {
       try {
         await coffeeApi.completeLoginRedirect();
-        window.location.replace("/c/blue-bottle-demo");
+        window.location.replace(consumeAuthReturnPath());
       } catch (caught) {
         setError(caught instanceof Error ? caught.message : "Unable to complete Google login.");
       }

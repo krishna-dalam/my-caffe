@@ -60,11 +60,14 @@ const realCoffeeApi: CoffeeApi = {
       return realJsonRequest<Customer>("/me");
     }
 
-    await startGoogleLogin({
-      clientId: env.cognitoClientId,
-      domain: env.cognitoDomain,
-      redirectUri: env.cognitoRedirectUri,
-    });
+    await startGoogleLogin(
+      {
+        clientId: env.cognitoClientId,
+        domain: env.cognitoDomain,
+        redirectUri: env.cognitoRedirectUri,
+      },
+      window.location.pathname,
+    );
     return new Promise<Customer>(() => undefined);
   },
   logout: () => {

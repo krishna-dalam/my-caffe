@@ -544,7 +544,29 @@ Acceptance:
 - API requests continue to include Hosted UI or dev bearer tokens.
 - Tests cover success, structured error, and fallback error handling.
 
-## PR 24: Cognito Hosted UI Environment Wiring
+## PR 24: Preserve Cafe Route After Hosted UI Login
+
+Status: implemented in this working tree.
+
+Goal: return customers to the scanned cafe route after Cognito Hosted UI login instead of always returning to the demo cafe.
+
+Files:
+
+- `apps/customer-web/src/auth/cognito.ts`
+- `apps/customer-web/src/auth/cognito.test.ts`
+- `apps/customer-web/src/api/coffeeApi.ts`
+- `apps/customer-web/src/pages/AuthCallbackPage.tsx`
+- `docs/tasks/customer-web-mvp-pr-plan.md`
+
+Acceptance:
+
+- Google login stores the current safe internal route before redirecting to Cognito.
+- Auth callback consumes and clears the stored return route after token exchange.
+- Unsafe, external, or callback return routes fall back to `/c/blue-bottle-demo`.
+- `/c/:slug` QR scan routes are preserved through login.
+- Tests cover safe and unsafe return path normalization.
+
+## PR 25: Cognito Hosted UI Environment Wiring
 
 Goal: provision Cognito User Pool, Google IdP, and app client settings with AWS CDK.
 
@@ -556,7 +578,7 @@ Files to update/create:
 - `apps/customer-web/src/pages/AuthCallbackPage.tsx`
 - `docs/auth.md`
 
-## PR 25: Subscription and Redemption API
+## PR 26: Subscription and Redemption API
 
 Goal: add customer profile, membership lookup, and redemption APIs with testable service logic.
 
@@ -567,7 +589,7 @@ Files to create:
 - `services/api/src/modules/redemptions/**`
 - `services/api/src/repositories/**`
 
-## PR 26: AWS CDK Deployment Hardening
+## PR 27: AWS CDK Deployment Hardening
 
 Goal: add deployable AWS infrastructure for Cognito, API Gateway, Lambda, and DynamoDB.
 
@@ -580,7 +602,7 @@ Files to create:
 - `infra/cdk/lib/constructs/api.construct.ts`
 - `infra/cdk/lib/constructs/database.construct.ts`
 
-## PR 27: Admin Manual Activation
+## PR 28: Admin Manual Activation
 
 Goal: add admin web and APIs for cafe setup, plan setup, and manual membership activation.
 

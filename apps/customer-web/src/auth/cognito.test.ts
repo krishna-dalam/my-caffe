@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { base64UrlEncode, buildGoogleAuthorizeUrl, createCodeChallenge } from "./cognito";
+import { base64UrlEncode, buildGoogleAuthorizeUrl, createCodeChallenge, normalizeAuthReturnPath } from "./cognito";
 
 describe("cognito auth helpers", () => {
   it("builds a Google Hosted UI authorization URL with PKCE", () => {
@@ -43,5 +43,17 @@ describe("cognito auth helpers", () => {
         state: "state",
       }),
     ).toThrow("Cognito Hosted UI is not configured");
+  });
+
+  it("keeps safe internal auth return paths", () => {
+    expect(normalizeAuthReturnPath("/c/blue-bottle-demo")).toBe("/c/blue-bottle-demo");
+    expect(normalizeAuthReturnPath("/c/another-cafe?source=qr")).toBe("/c/another-cafe?source=qr");
+  });
+
+  it("falls back for unsafe auth return paths", () => {
+    expect(normalizeAuthReturnPath(undefined)).toBe("/c/blue-bottle-demo");
+    expect(normalizeAuthReturnPath("https://example.com/cafe")).toBe("/c/blue-bottle-demo");
+    expect(normalizeAuthReturnPath("//example.com/cafe")).toBe("/c/blue-bottle-demo");
+    expect(normalizeAuthReturnPath("/auth/callback?code=abc")).toBe("/c/blue-bottle-demo");
   });
 });

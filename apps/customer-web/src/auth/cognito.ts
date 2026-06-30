@@ -27,6 +27,7 @@ interface TokenStorage {
 
 const storageKeys = {
   pkceVerifier: "my-caffe.auth.pkce-verifier",
+  returnPath: "my-caffe.auth.return-path",
   state: "my-caffe.auth.state",
   tokens: "my-caffe.auth.tokens",
 };
@@ -39,6 +40,18 @@ const requireHostedUiConfig = (config: CognitoHostedUiConfig): void => {
   if (!config.domain || !config.clientId || !config.redirectUri) {
     throw new Error("Cognito Hosted UI is not configured.");
   }
+};
+
+export const normalizeAuthReturnPath = (returnPath: string | undefined): string => {
+  if (!returnPath || !returnPath.startsWith("/") || returnPath.startsWith("//")) {
+    return "/c/blue-bottle-demo";
+  }
+
+  if (returnPath.startsWith("/auth/callback")) {
+    return "/c/blue-bottle-demo";
+  }
+
+  return returnPath;
 };
 
 const makeRandomString = (byteLength: number): string => {
@@ -86,7 +99,7 @@ export const buildGoogleAuthorizeUrl = ({
   return `${normalizeDomain(domain)}/oauth2/authorize?${params.toString()}`;
 };
 
-export const startGoogleLogin = async (config: CognitoHostedUiConfig): Promise<void> => {
+export const startGoogleLogin = async (config: CognitoHostedUiConfig, returnPath = window.location.pathname): Promise<void> => {
   requireHostedUiConfig(config);
 
   const verifier = makeRandomString(48);
@@ -95,6 +108,7 @@ export const startGoogleLogin = async (config: CognitoHostedUiConfig): Promise<v
   const storage = getStorage();
 
   storage.setItem(storageKeys.pkceVerifier, verifier);
+  storage.setItem(storageKeys.returnPath, normalizeAuthReturnPath(returnPath));
   storage.setItem(storageKeys.state, state);
   window.location.assign(buildGoogleAuthorizeUrl({ ...config, codeChallenge, state }));
 };
@@ -160,6 +174,13 @@ export const completeHostedUiCallback = async (
   storage.removeItem(storageKeys.state);
 };
 
+export const consumeAuthReturnPath = (): string => {
+  const storage = getStorage();
+  const returnPath = normalizeAuthReturnPath(storage.getItem(storageKeys.returnPath) ?? undefined);
+  storage.removeItem(storageKeys.returnPath);
+  return returnPath;
+};
+
 export const getAccessToken = (): string | null => {
   const rawTokens = getStorage().getItem(storageKeys.tokens);
   if (!rawTokens) {
@@ -178,6 +199,7 @@ export const getAccessToken = (): string | null => {
 export const clearAuthSession = (): void => {
   const storage = getStorage();
   storage.removeItem(storageKeys.pkceVerifier);
+  storage.removeItem(storageKeys.returnPath);
   storage.removeItem(storageKeys.state);
   storage.removeItem(storageKeys.tokens);
 };
