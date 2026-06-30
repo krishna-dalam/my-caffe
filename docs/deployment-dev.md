@@ -152,7 +152,7 @@ DEV_WEB_CERTIFICATE_ARN
 
 If DNS remains in the management account, leave `DEV_HOSTED_ZONE_ID` and `DEV_HOSTED_ZONE_NAME` empty and create DNS records manually after deploy.
 
-The assumed AWS role should trust this repository's GitHub OIDC provider and be scoped to the `dev` environment where possible. The workflow runs build, typecheck, lint, tests, then `pnpm infra:deploy:ci`.
+The assumed AWS role should trust this repository's GitHub OIDC provider and be scoped to the `dev` environment where possible. The workflow runs build, typecheck, lint, tests, `pnpm infra:deploy:ci`, then `pnpm smoke:dev`.
 
 ## DNS
 

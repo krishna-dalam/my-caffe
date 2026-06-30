@@ -75,3 +75,10 @@ jobs:
 
       - name: Deploy CDK stack
         run: pnpm infra:deploy:ci
+
+      - name: Smoke test dev deployment
+        env:
+          SMOKE_API_BASE_URL: https://api.dev.mycaffe.in/v1
+          SMOKE_CAFE_SLUG: blue-bottle-demo
+          SMOKE_WEB_BASE_URL: https://dev.mycaffe.in
+        run: pnpm smoke:dev

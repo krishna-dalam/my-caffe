@@ -680,7 +680,26 @@ Acceptance:
 - Runbook documents how to create or reuse the GitHub OIDC provider.
 - Runbook documents where to put `DEV_AWS_DEPLOY_ROLE_ARN`.
 
-## PR 30: Admin Manual Activation
+## PR 30: Post-Deploy Smoke Gate
+
+Status: implemented in this working tree.
+
+Goal: make the manual dev GitHub deployment fail visibly if public web/API smoke checks do not pass after CDK deploy.
+
+Files:
+
+- `.github/workflows/deploy-dev.yml`
+- `docs/deployment-dev.md`
+- `docs/tasks/customer-web-mvp-pr-plan.md`
+
+Acceptance:
+
+- `Deploy Dev` runs `pnpm smoke:dev` after `pnpm infra:deploy:ci`.
+- Smoke step uses `https://dev.mycaffe.in` and `https://api.dev.mycaffe.in/v1`.
+- Smoke step verifies the default `blue-bottle-demo` QR cafe slug.
+- Runbook reflects the post-deploy smoke gate.
+
+## PR 31: Admin Manual Activation
 
 Goal: add admin web and APIs for cafe setup, plan setup, and manual membership activation.
 
