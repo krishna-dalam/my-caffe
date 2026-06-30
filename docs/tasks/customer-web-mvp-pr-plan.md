@@ -766,7 +766,27 @@ Acceptance:
 - Offline config-only validation can explicitly set `SKIP_AWS_IDENTITY_CHECK=true`.
 - Docs make clear the skip must not be used for real deploys.
 
-## PR 34: Admin Manual Activation
+## PR 34: Manual DNS Smoke Control
+
+Status: implemented in this working tree.
+
+Goal: let the first dev GitHub deploy complete when DNS records are managed manually in the management account, while still allowing the public smoke gate after DNS resolves.
+
+Files:
+
+- `.github/workflows/deploy-dev.yml`
+- `docs/deployment-dev.md`
+- `docs/dev-launch-checklist.md`
+- `docs/tasks/customer-web-mvp-pr-plan.md`
+
+Acceptance:
+
+- `Deploy Dev` has a `run_smoke` workflow input.
+- Smoke step runs only when `run_smoke=true`.
+- Runbook explains first deploy should use `run_smoke=false` for manual DNS.
+- Checklist tells operators to run smoke after DNS resolves.
+
+## PR 35: Admin Manual Activation
 
 Goal: add admin web and APIs for cafe setup, plan setup, and manual membership activation.
 

@@ -2,6 +2,12 @@ name: Deploy Dev
 
 on:
   workflow_dispatch:
+    inputs:
+      run_smoke:
+        description: Run public smoke checks after deploy. Enable after DNS records resolve.
+        required: true
+        default: false
+        type: boolean
 
 concurrency:
   group: deploy-dev
@@ -77,6 +83,7 @@ jobs:
         run: pnpm infra:deploy:ci
 
       - name: Smoke test dev deployment
+        if: inputs.run_smoke
         env:
           SMOKE_API_BASE_URL: https://api.dev.mycaffe.in/v1
           SMOKE_CAFE_SLUG: blue-bottle-demo

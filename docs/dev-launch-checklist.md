@@ -97,7 +97,8 @@ pnpm infra:preflight:dev
 
 ## 6. Deploy
 
-- [ ] Run the `Deploy Dev` GitHub Actions workflow, or run `pnpm infra:deploy` locally with valid dev AWS credentials.
+- [ ] Run the `Deploy Dev` GitHub Actions workflow with `run_smoke=false` if DNS records are managed manually.
+- [ ] Or run `pnpm infra:deploy` locally with valid dev AWS credentials.
 - [ ] Capture CDK outputs:
 
 ```txt
@@ -126,7 +127,7 @@ API Gateway=CustomerApiRegionalHostedZoneId
 ## 8. Public Smoke Check
 
 - [ ] Wait for DNS to resolve.
-- [ ] Run:
+- [ ] Run the `Deploy Dev` GitHub Actions workflow with `run_smoke=true`, or run:
 
 ```sh
 pnpm smoke:dev
