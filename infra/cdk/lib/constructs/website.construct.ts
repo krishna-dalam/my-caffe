@@ -68,9 +68,7 @@ export class WebsiteConstruct extends Construct {
       distributionPaths: ["/*"],
       sources: [
         s3deploy.Source.asset(webDistPath),
-        s3deploy.Source.jsonData("config.json", props.runtimeConfig, {
-          escape: true,
-        }),
+        s3deploy.Source.jsonData("config.json", props.runtimeConfig),
       ],
     });
 
