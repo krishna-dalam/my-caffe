@@ -12,6 +12,7 @@
     "infra:deploy:ci": "pnpm --filter @my-caffe/infra-cdk deploy:ci",
     "infra:diff": "pnpm --filter @my-caffe/infra-cdk diff",
     "infra:preflight:dev": "pnpm --filter @my-caffe/infra-cdk preflight:dev",
+    "infra:print:github-oidc-policies": "pnpm --filter @my-caffe/infra-cdk print:github-oidc-policies",
     "infra:synth": "pnpm --filter @my-caffe/infra-cdk synth",
     "smoke:dev": "pnpm --filter @my-caffe/infra-cdk smoke:dev",
     "lint": "pnpm -r lint",

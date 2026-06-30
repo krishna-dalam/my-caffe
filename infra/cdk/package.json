@@ -10,6 +10,7 @@
     "diff": "pnpm synth && cdk diff",
     "lint": "tsc -p tsconfig.json --noEmit",
     "preflight:dev": "tsx scripts/validateDevDeployEnv.ts",
+    "print:github-oidc-policies": "tsx scripts/printGithubOidcPolicies.ts",
     "smoke:dev": "tsx scripts/smokeDevDeployment.ts",
     "synth": "pnpm --filter @my-caffe/api build && pnpm --filter @my-caffe/customer-web build && cdk synth",
     "test": "echo \"No infra tests yet\"",

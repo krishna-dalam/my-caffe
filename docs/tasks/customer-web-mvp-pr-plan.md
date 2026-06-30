@@ -658,7 +658,29 @@ Acceptance:
 - Smoke command supports URL and cafe slug overrides through environment variables.
 - Dry-run mode validates smoke configuration without network calls.
 
-## PR 29: Admin Manual Activation
+## PR 29: GitHub OIDC Deploy Role Setup
+
+Status: implemented in this working tree.
+
+Goal: make the manual dev deploy workflow actionable by generating the AWS IAM policies needed for the GitHub OIDC deploy role.
+
+Files:
+
+- `infra/cdk/scripts/printGithubOidcPolicies.ts`
+- `infra/cdk/package.json`
+- `package.json`
+- `docs/deployment-dev.md`
+- `docs/tasks/customer-web-mvp-pr-plan.md`
+
+Acceptance:
+
+- `pnpm infra:print:github-oidc-policies` prints a GitHub OIDC trust policy.
+- Generated trust policy is scoped to `repo:krishna-dalam/my-caffe:environment:dev`.
+- Generated permission policy only allows assuming CDK bootstrap deploy, file publishing, image publishing, and lookup roles.
+- Runbook documents how to create or reuse the GitHub OIDC provider.
+- Runbook documents where to put `DEV_AWS_DEPLOY_ROLE_ARN`.
+
+## PR 30: Admin Manual Activation
 
 Goal: add admin web and APIs for cafe setup, plan setup, and manual membership activation.
 

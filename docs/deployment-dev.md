@@ -103,6 +103,35 @@ CDK deploys `apps/customer-web/dist` and a generated `/config.json` file. The ru
 
 The `Deploy Dev` workflow is manual-only and uses GitHub OIDC to assume an AWS role. Configure a protected GitHub environment named `dev`.
 
+Generate the trust and permission policy JSON for the deploy role:
+
+```sh
+DEV_AWS_ACCOUNT_ID="dev-account-id" \
+CDK_DEFAULT_REGION="ap-south-1" \
+GITHUB_ORG="krishna-dalam" \
+GITHUB_REPO="my-caffe" \
+GITHUB_ENVIRONMENT="dev" \
+pnpm infra:print:github-oidc-policies
+```
+
+Create or confirm the GitHub OIDC provider in the dev AWS account:
+
+```sh
+aws iam create-open-id-connect-provider \
+  --url "https://token.actions.githubusercontent.com" \
+  --client-id-list "sts.amazonaws.com"
+```
+
+If the provider already exists, AWS returns `EntityAlreadyExists`; continue with the existing provider.
+
+Create a role named `my-caffe-dev-github-deploy` with the generated trust policy, then attach the generated permission policy. The policy only lets GitHub assume the CDK bootstrap roles in the dev account and region. The trust policy is scoped to:
+
+```txt
+repo:krishna-dalam/my-caffe:environment:dev
+```
+
+The value for `DEV_AWS_DEPLOY_ROLE_ARN` is printed by the generator.
+
 Environment secret:
 
 ```txt
