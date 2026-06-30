@@ -5,6 +5,8 @@ This runbook deploys the customer MVP to:
 - Customer web: `https://dev.mycaffe.in`
 - Customer API: `https://api.dev.mycaffe.in`
 
+Use [dev-launch-checklist.md](dev-launch-checklist.md) as the operator checklist for certificates, Google OAuth, GitHub OIDC, DNS, deploy, activation, and smoke testing.
+
 ## Prerequisites
 
 - Valid AWS credentials for the dev account.

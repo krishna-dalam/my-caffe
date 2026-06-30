@@ -725,7 +725,27 @@ Acceptance:
 - Tests cover scan input shape, normalization, matching, no-match, and duplicate handling.
 - Docs call out that this is an operator-only dev helper, not a production email index.
 
-## PR 32: Admin Manual Activation
+## PR 32: Dev Launch Checklist
+
+Status: implemented in this working tree.
+
+Goal: give the operator a single checklist for the remaining external launch tasks needed to make the dev customer webapp live.
+
+Files:
+
+- `docs/dev-launch-checklist.md`
+- `docs/deployment-dev.md`
+- `README.md`
+- `docs/tasks/customer-web-mvp-pr-plan.md`
+
+Acceptance:
+
+- Checklist covers AWS account, certificates, Google OAuth, GitHub OIDC, preflight, deploy, DNS, public smoke, customer activation, and authenticated QR smoke test.
+- Checklist records the concrete domains `dev.mycaffe.in` and `api.dev.mycaffe.in`.
+- Checklist includes the exact commands for policy generation, preflight, smoke testing, customer lookup, and activation.
+- Runbook and README link to the checklist.
+
+## PR 33: Admin Manual Activation
 
 Goal: add admin web and APIs for cafe setup, plan setup, and manual membership activation.
 
