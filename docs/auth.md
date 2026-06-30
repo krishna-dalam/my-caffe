@@ -120,13 +120,23 @@ Manual subscription activation must create the membership records for the Cognit
 
 ## Manual Customer Activation
 
-Until the admin app exists, activate a customer manually with the API workspace script after you know the customer's Cognito `sub`:
+Until the admin app exists, activate a customer manually after the customer signs in once and `/v1/me` creates their profile.
+
+Find the customer ID from the profile email:
+
+```sh
+COFFEE_TABLE_NAME="MyCaffe-dev-table-name" \
+AWS_REGION="ap-south-1" \
+pnpm find:customer --email "customer@example.com"
+```
+
+Then activate the subscription with that customer ID:
 
 ```sh
 COFFEE_TABLE_NAME="MyCaffe-dev-table-name" \
 AWS_REGION="ap-south-1" \
 pnpm activate:customer \
-  --customer-id "cognito-sub-from-token" \
+  --customer-id "customer-id-from-find-customer" \
   --customer-email "customer@example.com" \
   --customer-name "Customer Name"
 ```

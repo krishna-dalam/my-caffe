@@ -786,7 +786,24 @@ Acceptance:
 - Runbook explains first deploy should use `run_smoke=false` for manual DNS.
 - Checklist tells operators to run smoke after DNS resolves.
 
-## PR 35: Admin Manual Activation
+## PR 35: Auth Activation Docs Consistency
+
+Status: implemented in this working tree.
+
+Goal: keep auth documentation aligned with the dev customer lookup helper used before manual activation.
+
+Files:
+
+- `docs/auth.md`
+- `docs/tasks/customer-web-mvp-pr-plan.md`
+
+Acceptance:
+
+- Auth docs tell operators to let the customer sign in once.
+- Auth docs use `pnpm find:customer --email` to find the stored Cognito customer ID.
+- Activation command uses the customer ID returned by the lookup helper.
+
+## PR 36: Admin Manual Activation
 
 Goal: add admin web and APIs for cafe setup, plan setup, and manual membership activation.
 
