@@ -82,3 +82,20 @@ export interface RedeemCoffeeResponse {
 export interface RedemptionHistoryView {
   redemptions: Redemption[];
 }
+
+export type WaitlistRole = "customer" | "cafe_owner";
+
+export interface JoinWaitlistRequest {
+  city: string;
+  consentToContact: boolean;
+  email?: string;
+  name: string;
+  phone: string;
+  role: WaitlistRole;
+  source?: string;
+}
+
+export interface JoinWaitlistResponse {
+  leadId: string;
+  message: string;
+}

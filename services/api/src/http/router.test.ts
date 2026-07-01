@@ -48,6 +48,49 @@ describe("customer API router", () => {
     expect(parseBody<{ data: { activeMembership: unknown } }>(response.body).data.activeMembership).toBeNull();
   });
 
+  it("accepts public waitlist leads", async () => {
+    const response = await createRouter().handle(
+      makeEvent({
+        body: {
+          city: "Bengaluru",
+          consentToContact: true,
+          email: "coffee@example.com",
+          name: "Coffee Fan",
+          phone: "9876543210",
+          role: "customer",
+          source: "instagram",
+        },
+        method: "POST",
+        path: "/v1/waitlist",
+      }),
+    );
+
+    expect(response.statusCode).toBe(201);
+    expect(parseBody<{ data: { leadId: string; message: string } }>(response.body).data).toMatchObject({
+      leadId: expect.stringMatching(/^lead_/),
+      message: "You are on the My Caffe waitlist.",
+    });
+  });
+
+  it("validates public waitlist leads", async () => {
+    const response = await createRouter().handle(
+      makeEvent({
+        body: {
+          city: "Bengaluru",
+          consentToContact: false,
+          name: "A",
+          phone: "123",
+          role: "customer",
+        },
+        method: "POST",
+        path: "/v1/waitlist",
+      }),
+    );
+
+    expect(response.statusCode).toBe(400);
+    expect(parseBody<{ error: { code: string } }>(response.body).error.code).toBe("VALIDATION_ERROR");
+  });
+
   it("requires auth for customer profile", async () => {
     const response = await createRouter().handle(makeEvent({ method: "GET", path: "/v1/me" }));
 

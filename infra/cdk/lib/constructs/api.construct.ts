@@ -78,6 +78,11 @@ export class ApiConstruct extends Construct {
       path: "/v1/cafes/{slug}",
     });
     this.api.addRoutes({
+      integration,
+      methods: [apigatewayv2.HttpMethod.POST],
+      path: "/v1/waitlist",
+    });
+    this.api.addRoutes({
       authorizer: customerAuthorizer,
       integration,
       methods: [apigatewayv2.HttpMethod.GET],

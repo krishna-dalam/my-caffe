@@ -10,6 +10,9 @@ export function HomePage() {
             counter.
           </p>
           <div className="home-actions">
+            <a className="primary-link" href="/join-waitlist?utm_source=home">
+              Join waitlist
+            </a>
             <a className="primary-link" href="/c/blue-bottle-demo">
               Open customer pass
             </a>

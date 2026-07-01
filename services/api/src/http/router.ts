@@ -4,6 +4,9 @@ import { env } from "../config/env.js";
 import type { CustomerService } from "../modules/customer/customerService.js";
 import { createCustomerService, RedeemCoffeeError } from "../modules/customer/customerService.js";
 import { createCustomerRepository } from "../modules/customer/repositoryFactory.js";
+import { createDynamoDocumentClient } from "../db/dynamodbClient.js";
+import { createDynamoWaitlistRepository, createMemoryWaitlistRepository } from "../modules/waitlist/waitlistRepository.js";
+import { createWaitlistService, parseJoinWaitlistRequest, WaitlistValidationError } from "../modules/waitlist/waitlistService.js";
 import { created, failure, noContent, ok } from "./responses.js";
 import type { ApiGatewayHttpEvent, ApiGatewayHttpResponse, ApiRequest, ApiRequestPrincipal } from "./types.js";
 
@@ -83,6 +86,7 @@ const createDefaultCustomerService = (customerId: string): CustomerService =>
 
 export const createRouter = (customerService?: CustomerService): AppRouter => {
   const localServicesByCustomerId = new Map<string, CustomerService>();
+  const memoryWaitlistRepository = createMemoryWaitlistRepository();
 
   const getService = (principal: ApiRequestPrincipal | null): CustomerService => {
     if (customerService) {
@@ -104,6 +108,12 @@ export const createRouter = (customerService?: CustomerService): AppRouter => {
     return service;
   };
 
+  const waitlistService = createWaitlistService(
+    env.customerRepository === "dynamodb"
+      ? createDynamoWaitlistRepository({ client: createDynamoDocumentClient(), tableName: env.tableName })
+      : memoryWaitlistRepository,
+  );
+
   return {
     async handle(event) {
       let request: ApiRequest;
@@ -121,6 +131,18 @@ export const createRouter = (customerService?: CustomerService): AppRouter => {
 
       if (request.method === "GET" && request.path === "/v1/health") {
         return ok({ status: "ok" }, request.requestId);
+      }
+
+      if (request.method === "POST" && request.path === "/v1/waitlist") {
+        try {
+          return created(await waitlistService.join(parseJoinWaitlistRequest(request.body)), request.requestId);
+        } catch (error) {
+          if (error instanceof WaitlistValidationError) {
+            return failure("VALIDATION_ERROR", error.message, request.requestId, 400);
+          }
+
+          throw error;
+        }
       }
 
       const cafeMatch = request.path.match(/^\/v1\/cafes\/([^/]+)$/);
