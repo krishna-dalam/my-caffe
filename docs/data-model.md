@@ -34,6 +34,8 @@ CAFE#{cafeId}               PROFILE
 
 For deployed authenticated customer routes, `customerId` is the Cognito `sub` claim from the API Gateway JWT authorizer. `GET /v1/me` creates the `CUSTOMER#{sub}` profile record from Cognito claims on first login. Local memory mode uses `customer_demo_001` when called with the development bearer token.
 
+The planned Cafe Onboarding feature expands cafe records with admin-managed fields such as area, city, contact details, Google Maps URL, and status. See [cafe-onboarding.md](cafe-onboarding.md) for the proposed cafe API contract and DynamoDB entity shape.
+
 GSI examples:
 
 ```txt
