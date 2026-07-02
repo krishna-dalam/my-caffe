@@ -170,6 +170,12 @@ export const createMockCoffeeApi = ({
       throw new Error("No active subscription found for this cafe.");
     }
 
+    if (demoCafe.status !== "active") {
+      throw new Error(
+        demoCafe.status === "inactive" ? "This cafe is currently inactive." : "This cafe is not accepting redemptions yet.",
+      );
+    }
+
     if (session.membership.remainingCoffees <= 0) {
       throw new Error("No coffees remaining in this subscription.");
     }

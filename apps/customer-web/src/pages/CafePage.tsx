@@ -1,4 +1,5 @@
 import type { CafeLandingView, Customer, RedeemCoffeeResponse, Redemption } from "@my-caffe/shared";
+import { isCafeActive } from "@my-caffe/shared";
 import { useEffect, useMemo, useState } from "react";
 import { coffeeApi } from "../api/coffeeApi";
 import { useAsync } from "../features/useAsync";
@@ -123,7 +124,9 @@ export function CafePage() {
   const customer = customerState.data;
   const remaining = latestRedemption?.membership.remainingCoffees ?? activeMembership?.remainingCoffees ?? 0;
   const total = latestRedemption?.membership.totalCoffees ?? activeMembership?.totalCoffees ?? 0;
-  const canRedeem = Boolean(customer && activeMembership && remaining > 0 && !isRedeeming);
+  const cafeStatusMessage =
+    cafe.status === "inactive" ? "This cafe is currently inactive." : "This cafe is not accepting redemptions yet.";
+  const canRedeem = Boolean(customer && activeMembership && isCafeActive(cafe) && remaining > 0 && !isRedeeming);
 
   return (
     <main className="page-shell">
@@ -161,6 +164,13 @@ export function CafePage() {
       </section>
 
       {actionError ? <div className="error-banner">{actionError}</div> : null}
+
+      {!isCafeActive(cafe) ? (
+        <section className="status-panel">
+          <h2>Redemptions unavailable</h2>
+          <p>{cafeStatusMessage}</p>
+        </section>
+      ) : null}
 
       {!customer ? (
         <section className="action-panel">
@@ -205,7 +215,13 @@ export function CafePage() {
                 <p>After redemption, a 4-digit code will appear here for staff verification.</p>
               )}
               <button className="primary-button" type="button" disabled={!canRedeem} onClick={redeem}>
-                {isRedeeming ? "Redeeming..." : remaining > 0 ? "Redeem 1 coffee" : "No coffees remaining"}
+                {isRedeeming
+                  ? "Redeeming..."
+                  : !isCafeActive(cafe)
+                    ? "Redemptions unavailable"
+                    : remaining > 0
+                      ? "Redeem 1 coffee"
+                      : "No coffees remaining"}
               </button>
             </article>
           </section>
@@ -234,7 +250,7 @@ export function CafePage() {
         </>
       ) : null}
 
-      {customer && !activeMembership ? (
+      {customer && isCafeActive(cafe) && !activeMembership ? (
         <section className="status-panel">
           <h2>No active subscription</h2>
           <p>Ask the cafe or admin team to manually activate your subscription for this MVP.</p>

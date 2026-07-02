@@ -1,5 +1,7 @@
 import type { Cafe } from "@my-caffe/shared";
 import { afterEach, describe, expect, it, vi } from "vitest";
+import { createCustomerService } from "../modules/customer/customerService.js";
+import { createMemoryCustomerRepository } from "../modules/customer/memoryCustomerRepository.js";
 import { createRouter } from "./router.js";
 import type { ApiGatewayHttpEvent } from "./types.js";
 
@@ -53,6 +55,31 @@ describe("customer API router", () => {
 
     expect(response.statusCode).toBe(200);
     expect(parseBody<{ data: { activeMembership: unknown } }>(response.body).data.activeMembership).toBeNull();
+  });
+
+  it("returns draft cafe landing by slug for QR display", async () => {
+    const service = createCustomerService(
+      createMemoryCustomerRepository({
+        cafe: {
+          area: "Indiranagar",
+          cafeId: "cafe_draft_001",
+          city: "Bengaluru",
+          createdAt: "2026-01-01T00:00:00.000Z",
+          name: "Draft QR Cafe",
+          slug: "draft-qr-cafe",
+          status: "draft",
+          updatedAt: "2026-01-01T00:00:00.000Z",
+        },
+      }),
+    );
+
+    const response = await createRouter(service).handle(makeEvent({ method: "GET", path: "/v1/cafes/draft-qr-cafe" }));
+
+    expect(response.statusCode).toBe(200);
+    expect(parseBody<{ data: { cafe: Cafe } }>(response.body).data.cafe).toMatchObject({
+      name: "Draft QR Cafe",
+      status: "draft",
+    });
   });
 
   it("accepts public waitlist leads", async () => {
@@ -136,6 +163,38 @@ describe("customer API router", () => {
       redemption: { verificationCode: expect.stringMatching(/^\d{4}$/) },
     });
     expect(parseBody<{ data: unknown[] }>(historyResponse.body).data).toHaveLength(1);
+  });
+
+  it.each([
+    ["draft", "This cafe is not accepting redemptions yet."],
+    ["inactive", "This cafe is currently inactive."],
+  ] as const)("rejects redemption for %s cafes", async (status, message) => {
+    const cafe: Cafe = {
+      area: "Indiranagar",
+      cafeId: `cafe_${status}_001`,
+      city: "Bengaluru",
+      createdAt: "2026-01-01T00:00:00.000Z",
+      name: `${status} Cafe`,
+      slug: `${status}-cafe`,
+      status,
+      updatedAt: "2026-01-01T00:00:00.000Z",
+    };
+    const service = createCustomerService(createMemoryCustomerRepository({ cafe }));
+
+    const response = await createRouter(service).handle(
+      makeEvent({
+        body: { cafeId: cafe.cafeId },
+        headers: { authorization: "Bearer demo-token" },
+        method: "POST",
+        path: "/v1/redemptions",
+      }),
+    );
+
+    expect(response.statusCode).toBe(400);
+    expect(parseBody<{ error: { code: string; message: string } }>(response.body).error).toMatchObject({
+      code: "CAFE_NOT_ACTIVE",
+      message,
+    });
   });
 
   it("scopes customer state by Cognito subject claim", async () => {

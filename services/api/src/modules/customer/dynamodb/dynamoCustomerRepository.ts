@@ -130,6 +130,21 @@ export const createDynamoCustomerRepository = ({
       return (response.Item as StoredCafe | undefined) ?? null;
     },
 
+    async getCafeById(cafeId) {
+      const key = customerKeys.cafeProfile(cafeId);
+      const response = await client.send(
+        new GetCommand({
+          Key: {
+            PK: key.pk,
+            SK: key.sk,
+          },
+          TableName: tableName,
+        }),
+      );
+
+      return (response.Item as StoredCafe | undefined) ?? null;
+    },
+
     async getCurrentCustomer() {
       return readCurrentCustomer();
     },

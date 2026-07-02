@@ -1,6 +1,7 @@
 export type ApiErrorCode =
   | "AUTH_REQUIRED"
   | "FORBIDDEN"
+  | "CAFE_NOT_ACTIVE"
   | "NOT_FOUND"
   | "VALIDATION_ERROR"
   | "NO_ACTIVE_MEMBERSHIP"

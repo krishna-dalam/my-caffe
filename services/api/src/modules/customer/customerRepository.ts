@@ -8,6 +8,7 @@ export interface CustomerProfileInput {
 
 export interface CustomerRepository {
   commitRedemption(currentMembership: Membership, nextMembership: Membership, redemption: Redemption): Promise<void>;
+  getCafeById(cafeId: string): Promise<Cafe | null>;
   findCafeBySlug(slug: string): Promise<Cafe | null>;
   getCurrentCustomer(): Promise<Customer>;
   getOrCreateCurrentCustomer(profile: CustomerProfileInput): Promise<Customer>;

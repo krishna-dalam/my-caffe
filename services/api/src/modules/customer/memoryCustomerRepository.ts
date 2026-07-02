@@ -20,6 +20,7 @@ const demoCustomer: Customer = {
 };
 
 interface MemoryCustomerRepositoryOptions {
+  cafe?: Cafe;
   customerId?: string;
 }
 
@@ -38,10 +39,10 @@ const makeCustomerFromProfile = (profile: CustomerProfileInput): Customer => ({
   email: profile.email ?? `${profile.customerId}@example.test`,
 });
 
-const makeMembership = (customerId: string): Membership => ({
+const makeMembership = (customerId: string, cafeId = demoCafe.cafeId): Membership => ({
   membershipId: "membership_demo_001",
   customerId,
-  cafeId: demoCafe.cafeId,
+  cafeId,
   planId: "plan_demo_001",
   planName: "Monthly 8 Coffee Pass",
   status: "active",
@@ -51,10 +52,11 @@ const makeMembership = (customerId: string): Membership => ({
 });
 
 export const createMemoryCustomerRepository = ({
+  cafe = demoCafe,
   customerId = demoCustomer.customerId,
 }: MemoryCustomerRepositoryOptions = {}): CustomerRepository => {
   let customer = makeCustomer(customerId);
-  let membership = makeMembership(customer.customerId);
+  let membership = makeMembership(customer.customerId, cafe.cafeId);
   let redemptions: Redemption[] = [];
 
   return {
@@ -64,7 +66,11 @@ export const createMemoryCustomerRepository = ({
     },
 
     async findCafeBySlug(slug) {
-      return slug === demoCafe.slug ? demoCafe : null;
+      return slug === cafe.slug ? cafe : null;
+    },
+
+    async getCafeById(cafeId) {
+      return cafe.cafeId === cafeId ? cafe : null;
     },
 
     async getCurrentCustomer() {

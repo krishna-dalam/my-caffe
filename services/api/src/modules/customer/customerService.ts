@@ -1,8 +1,8 @@
-import type { CafeLandingView, Customer, RedeemCoffeeResponse, Redemption } from "@my-caffe/shared";
+import { isCafeActive, type CafeLandingView, type Customer, type RedeemCoffeeResponse, type Redemption } from "@my-caffe/shared";
 import { randomUUID } from "node:crypto";
 import type { CustomerProfileInput, CustomerRepository } from "./customerRepository.js";
 
-export type RedeemCoffeeErrorCode = "NO_ACTIVE_MEMBERSHIP" | "NO_REMAINING_COFFEES";
+export type RedeemCoffeeErrorCode = "CAFE_NOT_ACTIVE" | "NO_ACTIVE_MEMBERSHIP" | "NO_REMAINING_COFFEES";
 
 export class RedeemCoffeeError extends Error {
   constructor(
@@ -42,6 +42,18 @@ export const createCustomerService = (repository: CustomerRepository): CustomerS
   },
 
   async redeemCoffee(cafeId) {
+    const cafe = await repository.getCafeById(cafeId);
+    if (!cafe) {
+      throw new RedeemCoffeeError("NO_ACTIVE_MEMBERSHIP", "No active subscription found for this cafe.");
+    }
+
+    if (!isCafeActive(cafe)) {
+      throw new RedeemCoffeeError(
+        "CAFE_NOT_ACTIVE",
+        cafe.status === "inactive" ? "This cafe is currently inactive." : "This cafe is not accepting redemptions yet.",
+      );
+    }
+
     const membership = await repository.getMembershipForCafe(cafeId);
 
     if (!membership || membership.status !== "active") {
