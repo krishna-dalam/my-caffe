@@ -1,6 +1,7 @@
 interface CustomerWebEnv {
   appName: string;
   apiBaseUrl: string;
+  webBaseUrl: string;
   useMockApi: boolean;
   cognitoDomain: string;
   cognitoClientId: string;
@@ -35,6 +36,7 @@ const isRuntimeConfig = (value: unknown): value is RuntimeConfig => {
 export const env: CustomerWebEnv = {
   appName: readEnv("VITE_APP_NAME") ?? "My Caffe",
   apiBaseUrl: readEnv("VITE_API_BASE_URL") ?? "http://localhost:3000/v1",
+  webBaseUrl: readEnv("VITE_WEB_BASE_URL") ?? (typeof window === "undefined" ? "http://localhost:5173" : window.location.origin),
   useMockApi: readEnv("VITE_USE_MOCK_API") !== "false",
   cognitoDomain: readEnv("VITE_COGNITO_DOMAIN") ?? "",
   cognitoClientId: readEnv("VITE_COGNITO_CLIENT_ID") ?? "",
@@ -49,6 +51,10 @@ export const applyRuntimeConfig = (config: RuntimeConfig): void => {
 
   if (typeof config.apiBaseUrl === "string" && config.apiBaseUrl.trim().length > 0) {
     env.apiBaseUrl = config.apiBaseUrl;
+  }
+
+  if (typeof config.webBaseUrl === "string" && config.webBaseUrl.trim().length > 0) {
+    env.webBaseUrl = config.webBaseUrl;
   }
 
   if (typeof config.useMockApi === "boolean") {

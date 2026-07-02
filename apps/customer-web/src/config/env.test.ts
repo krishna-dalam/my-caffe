@@ -19,6 +19,7 @@ describe("customer web runtime config", () => {
       cognitoDomain: "https://my-caffe-dev.auth.ap-south-1.amazoncognito.com",
       cognitoRedirectUri: "https://dev.mycaffe.in/auth/callback",
       useMockApi: false,
+      webBaseUrl: "https://dev.mycaffe.in",
     });
 
     expect(env).toMatchObject({
@@ -28,6 +29,7 @@ describe("customer web runtime config", () => {
       cognitoDomain: "https://my-caffe-dev.auth.ap-south-1.amazoncognito.com",
       cognitoRedirectUri: "https://dev.mycaffe.in/auth/callback",
       useMockApi: false,
+      webBaseUrl: "https://dev.mycaffe.in",
     });
     expect(env.devAccessToken).toBe(originalEnv.devAccessToken);
   });
@@ -37,6 +39,7 @@ describe("customer web runtime config", () => {
       json: async () => ({
         apiBaseUrl: "https://api.dev.mycaffe.in/v1",
         useMockApi: false,
+        webBaseUrl: "https://dev.mycaffe.in",
       }),
       ok: true,
     })) as unknown as typeof fetch;
@@ -46,6 +49,7 @@ describe("customer web runtime config", () => {
     expect(globalThis.fetch).toHaveBeenCalledWith("/config.json", { cache: "no-store" });
     expect(env.apiBaseUrl).toBe("https://api.dev.mycaffe.in/v1");
     expect(env.useMockApi).toBe(false);
+    expect(env.webBaseUrl).toBe("https://dev.mycaffe.in");
   });
 
   it("keeps build-time env when config.json is unavailable", async () => {

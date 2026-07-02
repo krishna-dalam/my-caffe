@@ -82,8 +82,10 @@ The website deployment uploads the built files from `apps/customer-web/dist` plu
   "cognitoClientId": "<Cognito app client id>",
   "cognitoDomain": "https://my-caffe-dev.auth.ap-south-1.amazoncognito.com",
   "cognitoRedirectUri": "https://dev.mycaffe.in/auth/callback",
-  "useMockApi": false
+  "useMockApi": false,
+  "webBaseUrl": "https://dev.mycaffe.in"
 }
 ```
 
 If `API_CERTIFICATE_ARN` is absent, `apiBaseUrl` falls back to the generated API Gateway endpoint plus `/v1`.
+`webBaseUrl` is used for public links such as cafe redemption QR targets.

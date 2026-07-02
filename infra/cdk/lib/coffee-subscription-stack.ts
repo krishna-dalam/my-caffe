@@ -60,6 +60,7 @@ export class CoffeeSubscriptionStack extends cdk.Stack {
           : "",
         cognitoRedirectUri: `${config.allowedOrigin}/auth/callback`,
         useMockApi: false,
+        webBaseUrl: config.allowedOrigin,
       },
     });
 
