@@ -6,6 +6,7 @@
   "scripts": {
     "activate:customer": "pnpm --filter @my-caffe/api run activate:customer",
     "build": "pnpm -r build",
+    "dev:admin": "pnpm --filter @my-caffe/admin-web run dev",
     "dev:api": "pnpm --filter @my-caffe/api run dev",
     "dev:customer": "pnpm --filter @my-caffe/customer-web run dev",
     "find:customer": "pnpm --filter @my-caffe/api run find:customer",
