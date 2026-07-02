@@ -2,7 +2,11 @@ import { describe, expect, it } from "vitest";
 import {
   buildCafeQrDisplayUrl,
   buildCustomerRedeemUrl,
+  CAFE_STATUSES,
   generateCafeSlug,
+  getCafeRedemptionUnavailableMessage,
+  getCafeStatusDescription,
+  getCafeStatusLabel,
   isCafeActive,
   normalizeCafeName,
   validateCreateCafeInput,
@@ -86,6 +90,14 @@ describe("cafe onboarding helpers", () => {
     expect(isCafeActive({ status: "active" })).toBe(true);
     expect(isCafeActive({ status: "draft" })).toBe(false);
     expect(isCafeActive({ status: "inactive" })).toBe(false);
+  });
+
+  it("exposes cafe lifecycle labels and messages", () => {
+    expect(CAFE_STATUSES).toEqual(["draft", "active", "inactive"]);
+    expect(getCafeStatusLabel("draft")).toBe("Draft");
+    expect(getCafeStatusDescription("draft")).toBe("This cafe is created but not ready for customer redemption.");
+    expect(getCafeRedemptionUnavailableMessage("draft")).toBe("This cafe is not accepting redemptions yet.");
+    expect(getCafeRedemptionUnavailableMessage("inactive")).toBe("This cafe is currently inactive.");
   });
 
   it("builds public cafe URLs", () => {

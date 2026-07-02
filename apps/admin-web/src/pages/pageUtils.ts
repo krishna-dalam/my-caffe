@@ -1,4 +1,4 @@
-import type { CafeStatus } from "@my-caffe/shared";
+import { getCafeStatusLabel, type CafeStatus } from "@my-caffe/shared";
 
 export const formatDateTime = (isoDate: string): string =>
   new Intl.DateTimeFormat("en-IN", {
@@ -9,7 +9,7 @@ export const formatDateTime = (isoDate: string): string =>
     year: "numeric",
   }).format(new Date(isoDate));
 
-export const statusLabel = (status: CafeStatus): string => status.charAt(0).toUpperCase() + status.slice(1);
+export const statusLabel = (status: CafeStatus): string => getCafeStatusLabel(status);
 
 export const copyToClipboard = async (value: string): Promise<void> => {
   await navigator.clipboard.writeText(value);
@@ -19,4 +19,3 @@ export const openPrintWindow = (url: string): void => {
   const popup = window.open(url, "_blank", "noopener,noreferrer");
   popup?.focus();
 };
-

@@ -1,10 +1,11 @@
-import type {
-  Cafe,
-  CafeLandingView,
-  Customer,
-  Membership,
-  RedeemCoffeeResponse,
-  Redemption,
+import {
+  getCafeRedemptionUnavailableMessage,
+  type Cafe,
+  type CafeLandingView,
+  type Customer,
+  type Membership,
+  type RedeemCoffeeResponse,
+  type Redemption,
 } from "@my-caffe/shared";
 import type { CoffeeApi } from "./coffeeApi";
 
@@ -171,9 +172,7 @@ export const createMockCoffeeApi = ({
     }
 
     if (demoCafe.status !== "active") {
-      throw new Error(
-        demoCafe.status === "inactive" ? "This cafe is currently inactive." : "This cafe is not accepting redemptions yet.",
-      );
+      throw new Error(getCafeRedemptionUnavailableMessage(demoCafe.status));
     }
 
     if (session.membership.remainingCoffees <= 0) {

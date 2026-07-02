@@ -23,6 +23,8 @@ export type ApiResult<T> = ApiSuccess<T> | { error: ApiError };
 
 export type CafeStatus = "draft" | "active" | "inactive";
 
+export const CAFE_STATUSES: readonly CafeStatus[] = ["draft", "active", "inactive"];
+
 export interface Cafe {
   address?: string;
   area: string;
@@ -57,8 +59,6 @@ export type UpdateCafeInput = Partial<CreateCafeInput>;
 
 export type ValidationResult<T> = { ok: true; value: T } | { errors: string[]; ok: false };
 
-const cafeStatuses: readonly CafeStatus[] = ["draft", "active", "inactive"];
-
 const normalizeText = (value: string): string => value.trim().replace(/\s+/g, " ");
 
 const readOptionalString = (value: unknown): string | undefined => {
@@ -87,7 +87,7 @@ const isValidHttpsUrl = (value: string): boolean => {
 };
 
 const isCafeStatus = (value: unknown): value is CafeStatus =>
-  typeof value === "string" && cafeStatuses.includes(value as CafeStatus);
+  typeof value === "string" && CAFE_STATUSES.includes(value as CafeStatus);
 
 export const normalizeCafeName = (name: string): string => normalizeText(name);
 
@@ -106,6 +106,23 @@ export const generateCafeSlug = ({ area, city, name }: Pick<CreateCafeInput, "ar
 };
 
 export const isCafeActive = (cafe: Pick<Cafe, "status">): boolean => cafe.status === "active";
+
+export const getCafeStatusLabel = (status: CafeStatus): string => status.charAt(0).toUpperCase() + status.slice(1);
+
+export const getCafeStatusDescription = (status: CafeStatus): string => {
+  if (status === "active") {
+    return "Customers can redeem coffee at this cafe.";
+  }
+
+  if (status === "inactive") {
+    return "This cafe is temporarily disabled.";
+  }
+
+  return "This cafe is created but not ready for customer redemption.";
+};
+
+export const getCafeRedemptionUnavailableMessage = (status: CafeStatus): string =>
+  status === "inactive" ? "This cafe is currently inactive." : "This cafe is not accepting redemptions yet.";
 
 export const buildCafeQrDisplayUrl = (baseUrl: string, slug: string): string =>
   `${baseUrl.replace(/\/+$/u, "")}/qr/${encodeURIComponent(slug)}`;

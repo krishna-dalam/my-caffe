@@ -597,6 +597,24 @@ a {
   max-width: 420px;
 }
 
+.qr-status-banner {
+  border-radius: 8px;
+  font-weight: 900;
+  margin: 0 auto;
+  max-width: 520px;
+  padding: 12px 14px;
+}
+
+.qr-status-banner.draft {
+  background: #f5e8d3;
+  color: #6d4c1f;
+}
+
+.qr-status-banner.inactive {
+  background: #efe9e3;
+  color: #5f5248;
+}
+
 .qr-card {
   align-items: center;
   background: white;
@@ -812,6 +830,13 @@ a {
   .qr-copy {
     color: #111;
     font-size: 20pt;
+    margin-top: 4mm;
+  }
+
+  .qr-status-banner {
+    border: 1px solid #777;
+    color: #111;
+    font-size: 12pt;
     margin-top: 4mm;
   }
 

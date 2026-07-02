@@ -1,6 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
 import QRCode from "qrcode";
-import type { CafeLandingView } from "@my-caffe/shared";
+import {
+  getCafeRedemptionUnavailableMessage,
+  getCafeStatusLabel,
+  isCafeActive,
+  type CafeLandingView,
+} from "@my-caffe/shared";
 import { coffeeApi } from "../api/coffeeApi";
 import { env } from "../config/env";
 import { useAsync } from "../features/useAsync";
@@ -14,6 +19,9 @@ export const buildCafeScanUrl = (origin: string, slug: string): string => {
   const normalizedOrigin = origin.replace(/\/+$/, "");
   return `${normalizedOrigin}/c/${encodeURIComponent(slug)}`;
 };
+
+export const getQrPosterStatusText = (status: CafeLandingView["cafe"]["status"]): string | null =>
+  status === "active" ? null : `${getCafeStatusLabel(status)}: ${getCafeRedemptionUnavailableMessage(status)}`;
 
 const copyToClipboard = async (value: string): Promise<void> => {
   await navigator.clipboard.writeText(value);
@@ -70,6 +78,7 @@ export function QrDisplayPage() {
   }
 
   const { cafe } = cafeState.data;
+  const posterStatusText = getQrPosterStatusText(cafe.status);
   const copyRedeemLink = async () => {
     await copyToClipboard(scanUrl);
     setCopyMessage("Redeem link copied.");
@@ -90,6 +99,7 @@ export function QrDisplayPage() {
         <div className="qr-poster-heading">
           <h1>{cafe.name}</h1>
           <p className="qr-copy">Scan to redeem your coffee</p>
+          {!isCafeActive(cafe) && posterStatusText ? <p className={`qr-status-banner ${cafe.status}`}>{posterStatusText}</p> : null}
         </div>
 
         <div className="qr-card" aria-label={`QR code for ${scanUrl}`}>

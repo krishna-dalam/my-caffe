@@ -112,6 +112,11 @@ p {
   text-decoration: none;
 }
 
+.muted-copy {
+  color: #6f5633;
+  margin: 0;
+}
+
 .state-panel,
 .table-panel,
 .form-panel,
@@ -201,6 +206,12 @@ tr:last-child td {
 .form-panel {
   display: grid;
   gap: 18px;
+}
+
+.status-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .form-grid {
@@ -377,4 +388,3 @@ dd {
     grid-column: auto;
   }
 }
-

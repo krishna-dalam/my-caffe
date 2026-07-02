@@ -1,4 +1,4 @@
-import type { Cafe, CafeStatus } from "@my-caffe/shared";
+import { getCafeStatusDescription, type Cafe, type CafeStatus } from "@my-caffe/shared";
 import { useState } from "react";
 import { adminCafeApi, cafeStatuses } from "../api/adminCafeApi";
 import { useAsync } from "../features/useAsync";
@@ -100,6 +100,25 @@ export function CafeDetailPage({ cafeId }: CafeDetailPageProps) {
           <section className="detail-panel">
             <p className="eyebrow">Status</p>
             <h2>Redemption state</h2>
+            <p className="muted-copy">{getCafeStatusDescription(cafeState.data.status)}</p>
+            <div className="status-actions">
+              <button
+                className="button primary"
+                type="button"
+                disabled={isSavingStatus || cafeState.data.status === "active"}
+                onClick={() => void updateStatus("active")}
+              >
+                Activate cafe
+              </button>
+              <button
+                className="button secondary"
+                type="button"
+                disabled={isSavingStatus || cafeState.data.status === "inactive"}
+                onClick={() => void updateStatus("inactive")}
+              >
+                Deactivate cafe
+              </button>
+            </div>
             <label>
               Edit status
               <select
@@ -180,4 +199,3 @@ export function CafeDetailPage({ cafeId }: CafeDetailPageProps) {
     </AdminLayout>
   );
 }
-

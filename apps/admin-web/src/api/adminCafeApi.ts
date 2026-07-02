@@ -1,4 +1,4 @@
-import type { Cafe, CafeStatus, CreateCafeInput, UpdateCafeInput } from "@my-caffe/shared";
+import { CAFE_STATUSES, type Cafe, type CafeStatus, type CreateCafeInput, type UpdateCafeInput } from "@my-caffe/shared";
 import { getAccessToken, startGoogleLogin } from "../auth/cognito";
 import { env } from "../config/env";
 import { jsonRequest } from "./httpClient";
@@ -7,7 +7,7 @@ export interface AdminCafeListResponse {
   cafes: Cafe[];
 }
 
-export const cafeStatuses: CafeStatus[] = ["draft", "active", "inactive"];
+export const cafeStatuses: readonly CafeStatus[] = CAFE_STATUSES;
 
 const getRequestAccessToken = (): string | null => getAccessToken() ?? (env.devAccessToken.trim() || null);
 
@@ -59,4 +59,3 @@ export const adminCafeApi = {
     });
   },
 };
-

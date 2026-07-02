@@ -1,5 +1,11 @@
-import type { CafeLandingView, Customer, RedeemCoffeeResponse, Redemption } from "@my-caffe/shared";
-import { isCafeActive } from "@my-caffe/shared";
+import {
+  getCafeRedemptionUnavailableMessage,
+  isCafeActive,
+  type CafeLandingView,
+  type Customer,
+  type RedeemCoffeeResponse,
+  type Redemption,
+} from "@my-caffe/shared";
 import { useEffect, useMemo, useState } from "react";
 import { coffeeApi } from "../api/coffeeApi";
 import { useAsync } from "../features/useAsync";
@@ -124,8 +130,7 @@ export function CafePage() {
   const customer = customerState.data;
   const remaining = latestRedemption?.membership.remainingCoffees ?? activeMembership?.remainingCoffees ?? 0;
   const total = latestRedemption?.membership.totalCoffees ?? activeMembership?.totalCoffees ?? 0;
-  const cafeStatusMessage =
-    cafe.status === "inactive" ? "This cafe is currently inactive." : "This cafe is not accepting redemptions yet.";
+  const cafeStatusMessage = isCafeActive(cafe) ? null : getCafeRedemptionUnavailableMessage(cafe.status);
   const canRedeem = Boolean(customer && activeMembership && isCafeActive(cafe) && remaining > 0 && !isRedeeming);
 
   return (

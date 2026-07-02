@@ -1,4 +1,11 @@
-import { isCafeActive, type CafeLandingView, type Customer, type RedeemCoffeeResponse, type Redemption } from "@my-caffe/shared";
+import {
+  getCafeRedemptionUnavailableMessage,
+  isCafeActive,
+  type CafeLandingView,
+  type Customer,
+  type RedeemCoffeeResponse,
+  type Redemption,
+} from "@my-caffe/shared";
 import { randomUUID } from "node:crypto";
 import type { CustomerProfileInput, CustomerRepository } from "./customerRepository.js";
 
@@ -48,10 +55,7 @@ export const createCustomerService = (repository: CustomerRepository): CustomerS
     }
 
     if (!isCafeActive(cafe)) {
-      throw new RedeemCoffeeError(
-        "CAFE_NOT_ACTIVE",
-        cafe.status === "inactive" ? "This cafe is currently inactive." : "This cafe is not accepting redemptions yet.",
-      );
+      throw new RedeemCoffeeError("CAFE_NOT_ACTIVE", getCafeRedemptionUnavailableMessage(cafe.status));
     }
 
     const membership = await repository.getMembershipForCafe(cafeId);

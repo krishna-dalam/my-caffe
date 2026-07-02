@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { buildCafeScanUrl } from "./QrDisplayPage";
+import { buildCafeScanUrl, getQrPosterStatusText } from "./QrDisplayPage";
 
 describe("QR display page", () => {
   it("builds the customer scan URL from origin and cafe slug", () => {
@@ -16,5 +16,11 @@ describe("QR display page", () => {
     expect(buildCafeScanUrl("https://dev.mycaffe.in///", "indiranagar-cafe")).toBe(
       "https://dev.mycaffe.in/c/indiranagar-cafe",
     );
+  });
+
+  it("shows lifecycle status text for draft and inactive QR posters", () => {
+    expect(getQrPosterStatusText("active")).toBeNull();
+    expect(getQrPosterStatusText("draft")).toBe("Draft: This cafe is not accepting redemptions yet.");
+    expect(getQrPosterStatusText("inactive")).toBe("Inactive: This cafe is currently inactive.");
   });
 });
