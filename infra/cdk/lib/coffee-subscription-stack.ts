@@ -37,6 +37,7 @@ export class CoffeeSubscriptionStack extends cdk.Stack {
         : undefined;
 
     const api = new ApiConstruct(this, "Api", {
+      adminEmails: config.adminEmails,
       certificateArn: config.apiCertificateArn,
       domainName: config.apiDomainName,
       allowedOrigin: config.allowedOrigin,

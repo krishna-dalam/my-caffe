@@ -1,4 +1,5 @@
-import { describe, expect, it } from "vitest";
+import type { Cafe } from "@my-caffe/shared";
+import { afterEach, describe, expect, it, vi } from "vitest";
 import { createRouter } from "./router.js";
 import type { ApiGatewayHttpEvent } from "./types.js";
 
@@ -32,6 +33,12 @@ const makeEvent = ({
 });
 
 const parseBody = <T>(body: string): T => JSON.parse(body) as T;
+
+const adminClaims = { email: "admin@example.com", name: "Admin User", sub: "cognito_admin_001" };
+
+afterEach(() => {
+  vi.unstubAllEnvs();
+});
 
 describe("customer API router", () => {
   it("returns health status", async () => {
@@ -204,5 +211,191 @@ describe("customer API router", () => {
 
     expect(response.statusCode).toBe(400);
     expect(parseBody<{ error: { code: string } }>(response.body).error.code).toBe("NO_REMAINING_COFFEES");
+  });
+
+  it("blocks admin cafe access for unauthenticated and non-admin users", async () => {
+    vi.stubEnv("ADMIN_EMAILS", "admin@example.com");
+    const router = createRouter();
+
+    const unauthenticatedResponse = await router.handle(makeEvent({ method: "GET", path: "/v1/admin/cafes" }));
+    const forbiddenResponse = await router.handle(
+      makeEvent({
+        claims: { email: "customer@example.com", name: "Customer", sub: "cognito_customer_001" },
+        method: "GET",
+        path: "/v1/admin/cafes",
+      }),
+    );
+
+    expect(unauthenticatedResponse.statusCode).toBe(401);
+    expect(parseBody<{ error: { code: string } }>(unauthenticatedResponse.body).error.code).toBe("AUTH_REQUIRED");
+    expect(forbiddenResponse.statusCode).toBe(403);
+    expect(parseBody<{ error: { code: string } }>(forbiddenResponse.body).error.code).toBe("FORBIDDEN");
+  });
+
+  it("creates an admin cafe with default draft status and links", async () => {
+    vi.stubEnv("ADMIN_EMAILS", "admin@example.com");
+
+    const response = await createRouter().handle(
+      makeEvent({
+        body: {
+          area: "Indiranagar",
+          city: "Bengaluru",
+          contactEmail: "manager@example.com",
+          contactPhone: "+91 98765 43210",
+          name: "Daily Brew",
+        },
+        claims: adminClaims,
+        method: "POST",
+        path: "/v1/admin/cafes",
+      }),
+    );
+
+    const cafe = parseBody<{ data: Cafe }>(response.body).data;
+
+    expect(response.statusCode).toBe(201);
+    expect(cafe).toMatchObject({
+      area: "Indiranagar",
+      cafeId: expect.stringMatching(/^cafe_/),
+      city: "Bengaluru",
+      contactEmail: "manager@example.com",
+      contactPhone: "+919876543210",
+      name: "Daily Brew",
+      slug: "daily-brew-indiranagar-bengaluru",
+      status: "draft",
+    });
+    expect(cafe.qrDisplayUrl).toBe("http://localhost:5173/qr/daily-brew-indiranagar-bengaluru");
+    expect(cafe.customerRedeemUrl).toBe("http://localhost:5173/c/daily-brew-indiranagar-bengaluru");
+  });
+
+  it("rejects admin cafe create requests missing required fields", async () => {
+    vi.stubEnv("ADMIN_EMAILS", "admin@example.com");
+
+    const response = await createRouter().handle(
+      makeEvent({
+        body: {
+          city: "Bengaluru",
+          name: "D",
+        },
+        claims: adminClaims,
+        method: "POST",
+        path: "/v1/admin/cafes",
+      }),
+    );
+
+    expect(response.statusCode).toBe(400);
+    expect(parseBody<{ error: { code: string; message: string } }>(response.body).error).toMatchObject({
+      code: "VALIDATION_ERROR",
+      message: expect.stringContaining("Area must be 2 to 80 characters."),
+    });
+  });
+
+  it("lists admin cafes", async () => {
+    vi.stubEnv("ADMIN_EMAILS", "admin@example.com");
+    const router = createRouter();
+
+    await router.handle(
+      makeEvent({
+        body: { area: "HSR Layout", city: "Bengaluru", name: "Morning Cup" },
+        claims: adminClaims,
+        method: "POST",
+        path: "/v1/admin/cafes",
+      }),
+    );
+    await router.handle(
+      makeEvent({
+        body: { area: "Koramangala", city: "Bengaluru", name: "Evening Roast", status: "active" },
+        claims: adminClaims,
+        method: "POST",
+        path: "/v1/admin/cafes",
+      }),
+    );
+
+    const response = await router.handle(makeEvent({ claims: adminClaims, method: "GET", path: "/v1/admin/cafes" }));
+    const cafes = parseBody<{ data: { cafes: Cafe[] } }>(response.body).data.cafes;
+
+    expect(response.statusCode).toBe(200);
+    expect(cafes).toHaveLength(2);
+    expect(cafes.map((cafe) => cafe.name)).toEqual(expect.arrayContaining(["Morning Cup", "Evening Roast"]));
+  });
+
+  it("gets and updates admin cafe status without changing slug", async () => {
+    vi.stubEnv("ADMIN_EMAILS", "admin@example.com");
+    const router = createRouter();
+    const createResponse = await router.handle(
+      makeEvent({
+        body: { area: "Indiranagar", city: "Bengaluru", name: "Slug Stable Cafe" },
+        claims: adminClaims,
+        method: "POST",
+        path: "/v1/admin/cafes",
+      }),
+    );
+    const createdCafe = parseBody<{ data: Cafe }>(createResponse.body).data;
+
+    const activeResponse = await router.handle(
+      makeEvent({
+        body: { status: "active" },
+        claims: adminClaims,
+        method: "PATCH",
+        path: `/v1/admin/cafes/${createdCafe.cafeId}`,
+      }),
+    );
+    const inactiveResponse = await router.handle(
+      makeEvent({
+        body: { area: "Whitefield", name: "Renamed Cafe", status: "inactive" },
+        claims: adminClaims,
+        method: "PATCH",
+        path: `/v1/admin/cafes/${createdCafe.cafeId}`,
+      }),
+    );
+    const getResponse = await router.handle(
+      makeEvent({
+        claims: adminClaims,
+        method: "GET",
+        path: `/v1/admin/cafes/${createdCafe.cafeId}`,
+      }),
+    );
+
+    expect(activeResponse.statusCode).toBe(200);
+    expect(parseBody<{ data: Cafe }>(activeResponse.body).data.status).toBe("active");
+    expect(inactiveResponse.statusCode).toBe(200);
+    expect(parseBody<{ data: Cafe }>(inactiveResponse.body).data).toMatchObject({
+      area: "Whitefield",
+      name: "Renamed Cafe",
+      slug: createdCafe.slug,
+      status: "inactive",
+    });
+    expect(parseBody<{ data: Cafe }>(getResponse.body).data.slug).toBe(createdCafe.slug);
+  });
+
+  it("generates a unique slug when a cafe slug already exists", async () => {
+    vi.stubEnv("ADMIN_EMAILS", "admin@example.com");
+    const router = createRouter();
+    const body = { area: "Indiranagar", city: "Bengaluru", name: "Duplicate Cafe" };
+
+    const firstResponse = await router.handle(
+      makeEvent({
+        body,
+        claims: adminClaims,
+        method: "POST",
+        path: "/v1/admin/cafes",
+      }),
+    );
+    const secondResponse = await router.handle(
+      makeEvent({
+        body,
+        claims: adminClaims,
+        method: "POST",
+        path: "/v1/admin/cafes",
+      }),
+    );
+
+    const firstCafe = parseBody<{ data: Cafe }>(firstResponse.body).data;
+    const secondCafe = parseBody<{ data: Cafe }>(secondResponse.body).data;
+
+    expect(firstResponse.statusCode).toBe(201);
+    expect(secondResponse.statusCode).toBe(201);
+    expect(firstCafe.slug).toBe("duplicate-cafe-indiranagar-bengaluru");
+    expect(secondCafe.slug).toMatch(/^duplicate-cafe-indiranagar-bengaluru-[a-f0-9-]+$/);
+    expect(secondCafe.slug).not.toBe(firstCafe.slug);
   });
 });

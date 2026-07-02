@@ -1,6 +1,9 @@
 import type { RedeemCoffeeRequest } from "@my-caffe/shared";
+import { validateCreateCafeInput, validateUpdateCafeInput } from "@my-caffe/shared";
 import { randomUUID } from "node:crypto";
-import { env } from "../config/env.js";
+import { env, readAdminEmails } from "../config/env.js";
+import { AdminCafeConflictError, type AdminCafeService, createAdminCafeService } from "../modules/admin/adminCafeService.js";
+import { createAdminCafeRepository } from "../modules/admin/repositoryFactory.js";
 import type { CustomerService } from "../modules/customer/customerService.js";
 import { createCustomerService, RedeemCoffeeError } from "../modules/customer/customerService.js";
 import { createCustomerRepository } from "../modules/customer/repositoryFactory.js";
@@ -84,9 +87,15 @@ const parseRedeemRequest = (body: unknown): RedeemCoffeeRequest | null => {
 const createDefaultCustomerService = (customerId: string): CustomerService =>
   createCustomerService(createCustomerRepository({ customerId }));
 
+const isAdminPrincipal = (principal: ApiRequestPrincipal): boolean => {
+  const email = principal.email?.trim().toLowerCase();
+  return email ? readAdminEmails().includes(email) : false;
+};
+
 export const createRouter = (customerService?: CustomerService): AppRouter => {
   const localServicesByCustomerId = new Map<string, CustomerService>();
   const memoryWaitlistRepository = createMemoryWaitlistRepository();
+  const adminCafeService: AdminCafeService = createAdminCafeService(createAdminCafeRepository(), env.allowedOrigin);
 
   const getService = (principal: ApiRequestPrincipal | null): CustomerService => {
     if (customerService) {
@@ -154,6 +163,64 @@ export const createRouter = (customerService?: CustomerService): AppRouter => {
         }
 
         return ok(view, request.requestId);
+      }
+
+      const adminCafeDetailMatch = request.path.match(/^\/v1\/admin\/cafes\/([^/]+)$/);
+      const isAdminCafeRoute = request.path === "/v1/admin/cafes" || adminCafeDetailMatch !== null;
+      if (isAdminCafeRoute) {
+        if (!request.principal) {
+          return failure("AUTH_REQUIRED", "Authentication is required.", request.requestId, 401);
+        }
+
+        if (!isAdminPrincipal(request.principal)) {
+          return failure("FORBIDDEN", "Admin access is required.", request.requestId, 403);
+        }
+
+        if (request.method === "POST" && request.path === "/v1/admin/cafes") {
+          const validation = validateCreateCafeInput(request.body);
+          if (!validation.ok) {
+            return failure("VALIDATION_ERROR", validation.errors.join(" "), request.requestId, 400);
+          }
+
+          try {
+            return created(await adminCafeService.createCafe(validation.value), request.requestId);
+          } catch (error) {
+            if (error instanceof AdminCafeConflictError) {
+              return failure("VALIDATION_ERROR", error.message, request.requestId, 409);
+            }
+
+            throw error;
+          }
+        }
+
+        if (request.method === "GET" && request.path === "/v1/admin/cafes") {
+          return ok({ cafes: await adminCafeService.listCafes() }, request.requestId);
+        }
+
+        if (adminCafeDetailMatch?.[1] && request.method === "GET") {
+          const cafe = await adminCafeService.getCafe(decodeURIComponent(adminCafeDetailMatch[1]));
+          if (!cafe) {
+            return failure("NOT_FOUND", "Cafe not found.", request.requestId, 404);
+          }
+
+          return ok(cafe, request.requestId);
+        }
+
+        if (adminCafeDetailMatch?.[1] && request.method === "PATCH") {
+          const validation = validateUpdateCafeInput(request.body);
+          if (!validation.ok) {
+            return failure("VALIDATION_ERROR", validation.errors.join(" "), request.requestId, 400);
+          }
+
+          const cafe = await adminCafeService.updateCafe(decodeURIComponent(adminCafeDetailMatch[1]), validation.value);
+          if (!cafe) {
+            return failure("NOT_FOUND", "Cafe not found.", request.requestId, 404);
+          }
+
+          return ok(cafe, request.requestId);
+        }
+
+        return failure("NOT_FOUND", "Route not found.", request.requestId, 404);
       }
 
       if (!request.principal) {

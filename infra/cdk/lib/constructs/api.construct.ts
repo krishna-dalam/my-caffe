@@ -13,6 +13,7 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 
 interface ApiConstructProps {
+  adminEmails: string;
   certificateArn?: string;
   domainName: string;
   allowedOrigin: string;
@@ -39,6 +40,7 @@ export class ApiConstruct extends Construct {
       code: lambda.Code.fromAsset(apiDistPath),
       environment: {
         ALLOWED_ORIGIN: props.allowedOrigin,
+        ADMIN_EMAILS: props.adminEmails,
         COFFEE_TABLE_NAME: props.table.tableName,
         CUSTOMER_REPOSITORY: "dynamodb",
       },
@@ -61,6 +63,7 @@ export class ApiConstruct extends Construct {
         allowMethods: [
           apigatewayv2.CorsHttpMethod.GET,
           apigatewayv2.CorsHttpMethod.OPTIONS,
+          apigatewayv2.CorsHttpMethod.PATCH,
           apigatewayv2.CorsHttpMethod.POST,
         ],
         allowOrigins: [props.allowedOrigin],
@@ -99,6 +102,18 @@ export class ApiConstruct extends Construct {
       integration,
       methods: [apigatewayv2.HttpMethod.POST],
       path: "/v1/redemptions",
+    });
+    this.api.addRoutes({
+      authorizer: customerAuthorizer,
+      integration,
+      methods: [apigatewayv2.HttpMethod.GET, apigatewayv2.HttpMethod.POST],
+      path: "/v1/admin/cafes",
+    });
+    this.api.addRoutes({
+      authorizer: customerAuthorizer,
+      integration,
+      methods: [apigatewayv2.HttpMethod.GET, apigatewayv2.HttpMethod.PATCH],
+      path: "/v1/admin/cafes/{cafeId}",
     });
 
     if (props.certificateArn) {

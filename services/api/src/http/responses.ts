@@ -4,7 +4,7 @@ import type { ApiGatewayHttpResponse } from "./types.js";
 
 const headers = {
   "Access-Control-Allow-Headers": "Authorization,Content-Type,X-Request-Id",
-  "Access-Control-Allow-Methods": "GET,POST,OPTIONS",
+  "Access-Control-Allow-Methods": "GET,PATCH,POST,OPTIONS",
   "Access-Control-Allow-Origin": env.allowedOrigin,
   "Content-Type": "application/json",
 };

@@ -235,7 +235,9 @@ Base path:
 /v1
 ```
 
-Admin routes require admin authentication and authorization. The exact admin auth mechanism is still to be implemented.
+Admin routes require Cognito authentication and MVP admin authorization through `ADMIN_EMAILS`.
+
+Only authenticated users whose email matches a comma-separated entry in `ADMIN_EMAILS` can call admin routes.
 
 ### POST /v1/admin/cafes
 
@@ -315,8 +317,7 @@ Response:
         "createdAt": "2026-07-02T10:00:00.000Z",
         "updatedAt": "2026-07-02T10:00:00.000Z"
       }
-    ],
-    "nextCursor": null
+    ]
   },
   "requestId": "request_123"
 }
@@ -367,8 +368,7 @@ Request:
 
 Rules:
 
-- If name, area, or city changes, backend may regenerate slug only if product explicitly chooses that behavior.
-- Safer default: slug is stable after create.
+- Slug is stable after create. Name, area, or city updates do not regenerate it so printed QR posters and copied links keep working.
 - Status changes must update `updatedAt`.
 
 Response:

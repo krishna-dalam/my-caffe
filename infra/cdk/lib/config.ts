@@ -1,6 +1,7 @@
 import type { Construct } from "constructs";
 
 export interface InfraConfig {
+  adminEmails: string;
   apiCertificateArn?: string;
   apiDomainName: string;
   allowedOrigin: string;
@@ -16,6 +17,7 @@ export interface InfraConfig {
 }
 
 export const readConfig = (scope: Construct, appEnv: string): InfraConfig => ({
+  adminEmails: scope.node.tryGetContext("adminEmails")?.toString() ?? process.env.ADMIN_EMAILS ?? "",
   apiCertificateArn: scope.node.tryGetContext("apiCertificateArn")?.toString() ?? process.env.API_CERTIFICATE_ARN,
   apiDomainName:
     scope.node.tryGetContext("apiDomainName")?.toString() ?? process.env.API_DOMAIN_NAME ?? `api.${appEnv}.mycaffe.in`,

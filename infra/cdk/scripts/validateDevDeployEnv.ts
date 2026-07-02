@@ -2,6 +2,7 @@ import { execFileSync } from "node:child_process";
 
 const requiredEnvVars = [
   "ALLOWED_ORIGIN",
+  "ADMIN_EMAILS",
   "API_CERTIFICATE_ARN",
   "API_DOMAIN_NAME",
   "APP_ENV",
