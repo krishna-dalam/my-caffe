@@ -29,11 +29,15 @@ const toCafeItem = (cafe: Cafe, key: { pk: string; sk: string }): ActivationItem
 
 export const createManualActivationItems = (input: ManualActivationInput): ActivationItem[] => {
   const cafe: Cafe = {
+    area: "Indiranagar",
     address: input.cafeAddress,
     cafeId: input.cafeId,
-    isActive: true,
+    city: "Bengaluru",
+    createdAt: new Date().toISOString(),
     name: input.cafeName,
     slug: input.cafeSlug,
+    status: "active",
+    updatedAt: new Date().toISOString(),
   };
   const customer: Customer = {
     customerId: input.customerId,

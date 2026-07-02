@@ -2,11 +2,15 @@ import type { Cafe, Customer, Membership, Redemption } from "@my-caffe/shared";
 import type { CustomerProfileInput, CustomerRepository } from "./customerRepository.js";
 
 const demoCafe: Cafe = {
+  area: "Indiranagar",
   cafeId: "cafe_demo_001",
+  city: "Bengaluru",
+  createdAt: "2026-01-01T00:00:00.000Z",
   name: "Blue Bottle Demo Cafe",
   slug: "blue-bottle-demo",
+  status: "active",
+  updatedAt: "2026-01-01T00:00:00.000Z",
   address: "Indiranagar, Bengaluru",
-  isActive: true,
 };
 
 const demoCustomer: Customer = {
