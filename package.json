@@ -10,6 +10,7 @@
     "dev:api": "pnpm --filter @my-caffe/api run dev",
     "dev:customer": "pnpm --filter @my-caffe/customer-web run dev",
     "find:customer": "pnpm --filter @my-caffe/api run find:customer",
+    "seed:dev-cafe": "pnpm --filter @my-caffe/api run seed:dev-cafe",
     "infra:deploy": "pnpm --filter @my-caffe/infra-cdk run deploy",
     "infra:deploy:ci": "pnpm --filter @my-caffe/infra-cdk run deploy:ci",
     "infra:diff": "pnpm --filter @my-caffe/infra-cdk run diff",

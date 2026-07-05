@@ -49,6 +49,39 @@ VITE_DEV_ACCESS_TOKEN="demo-token"
 
 Then run `pnpm dev:api` and `pnpm dev:customer` in separate terminals.
 
+## Dev Cafe Seed
+
+Use the dev seed script to create a sample cafe in DynamoDB and print its QR/redeem links:
+
+```sh
+TABLE_NAME="value-from-CoffeeTableName-output" \
+WEB_BASE_URL="https://dev.mycaffe.in" \
+API_BASE_URL="https://api.dev.mycaffe.in/v1" \
+pnpm seed:dev-cafe
+```
+
+Example output:
+
+```txt
+Cafe created:
+Name: Roast House Coffee
+Status: active
+QR poster: https://dev.mycaffe.in/qr/roast-house-coffee-gachibowli
+Customer redeem: https://dev.mycaffe.in/c/roast-house-coffee-gachibowli
+```
+
+To also activate a membership for a customer, the customer must sign in once first so their Cognito-backed customer profile exists. Then run:
+
+```sh
+TABLE_NAME="value-from-CoffeeTableName-output" \
+WEB_BASE_URL="https://dev.mycaffe.in" \
+API_BASE_URL="https://api.dev.mycaffe.in/v1" \
+CUSTOMER_EMAIL="customer@example.com" \
+pnpm seed:dev-cafe
+```
+
+The current MVP stores plan details on the membership record, so the seed script does not create a separate plan item unless the data model adds one later. You can also use existing DynamoDB config with `COFFEE_TABLE_NAME` instead of `TABLE_NAME`.
+
 ## Dev Deployment
 
 Use [docs/deployment-dev.md](docs/deployment-dev.md) for the `dev.mycaffe.in` deployment runbook.
