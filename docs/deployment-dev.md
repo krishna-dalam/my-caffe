@@ -195,6 +195,21 @@ SMOKE_CAFE_SLUG="blue-bottle-demo" \
 pnpm smoke:dev
 ```
 
+## Cafe Onboarding Smoke Test
+
+After deploy, validate a real cafe onboarding path from the admin UI.
+
+1. Sign in to the admin web app with an email listed in `ADMIN_EMAILS`.
+2. Open `/admin/cafes`.
+3. Create a cafe.
+4. Verify the generated cafe slug on the cafe detail page.
+5. Set the cafe status to `active`.
+6. Open `https://dev.mycaffe.in/qr/:slug`.
+7. Confirm the QR poster shows the cafe name and points to `https://dev.mycaffe.in/c/:slug`.
+8. Use the Print QR poster button and confirm the A4 print preview is clean.
+9. Open `https://dev.mycaffe.in/c/:slug` from a mobile device or mobile browser emulator.
+10. Continue with Google.
+
 ## Manual Customer Activation
 
 After a customer signs in once, find their Cognito `sub` from the customer profile:
@@ -213,21 +228,30 @@ AWS_REGION="ap-south-1" \
 pnpm activate:customer \
   --customer-id "cognito-sub" \
   --customer-email "customer@example.com" \
-  --customer-name "Customer Name"
+  --customer-name "Customer Name" \
+  --cafe-id "created-cafe-id" \
+  --cafe-name "Created Cafe Name" \
+  --cafe-slug "created-cafe-slug"
 ```
 
 The script is safe to run after first login: existing cafe and customer profile records are skipped by default. Existing membership records are not overwritten unless you pass `--overwrite`.
 
-## Smoke Test
+## Redemption Smoke Test
 
-1. Open `https://dev.mycaffe.in/qr/blue-bottle-demo`.
-2. Scan the QR code and confirm it opens `https://dev.mycaffe.in/c/blue-bottle-demo`.
-3. Continue with Google.
-4. Redeem one coffee.
-5. Confirm a 4-digit verification code appears.
+1. Refresh `https://dev.mycaffe.in/c/:slug`.
+2. Verify active membership is visible.
+3. Redeem one coffee.
+4. Confirm a 4-digit verification code appears.
+5. Have staff visually verify the 4-digit code.
 6. Confirm remaining coffee count decreases by one.
 7. Refresh and confirm redemption history remains visible.
+8. Deactivate the cafe from the admin cafe detail page.
+9. Refresh `https://dev.mycaffe.in/c/:slug`.
+10. Confirm redemption is blocked with the inactive cafe message.
 
-## Current Limitation
+## Known Limitations
 
-This runbook still uses manual subscription activation. Razorpay and admin activation UI are intentionally out of scope for the MVP deployment path.
+- Staff verification is visual only; there is no staff-side verification action yet.
+- Cafe staff login is not implemented yet.
+- Razorpay is not integrated yet.
+- Customer subscription activation is manual for dev/MVP validation.

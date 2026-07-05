@@ -137,11 +137,21 @@ pnpm smoke:dev
 - [ ] Confirm API health passes.
 - [ ] Confirm unauthenticated cafe landing passes.
 
-## 9. Customer Activation
+## 9. Cafe Onboarding Smoke Test
 
-- [ ] Open `https://dev.mycaffe.in/c/blue-bottle-demo`.
-- [ ] Sign in once with Google.
-- [ ] Find the customer profile:
+- [ ] Sign in to the admin web app with an email listed in `ADMIN_EMAILS`.
+- [ ] Open `/admin/cafes`.
+- [ ] Create a cafe from the admin UI.
+- [ ] Verify the generated cafe slug on the cafe detail page.
+- [ ] Set the cafe status to `active`.
+- [ ] Copy the QR poster URL, for example `https://dev.mycaffe.in/qr/:slug`.
+- [ ] Copy the customer redeem URL, for example `https://dev.mycaffe.in/c/:slug`.
+- [ ] Open `/qr/:slug`.
+- [ ] Confirm the QR poster shows the cafe name and customer redeem URL.
+- [ ] Click Print QR poster and confirm the print preview is clean.
+- [ ] Open `/c/:slug` from a mobile device or mobile browser emulator.
+- [ ] Login with Google.
+- [ ] Find the customer profile after first login:
 
 ```sh
 COFFEE_TABLE_NAME="CoffeeTableName-output" \
@@ -149,7 +159,7 @@ AWS_REGION="ap-south-1" \
 pnpm find:customer --email "customer@example.com"
 ```
 
-- [ ] Activate the subscription:
+- [ ] Activate the subscription for the created cafe:
 
 ```sh
 COFFEE_TABLE_NAME="CoffeeTableName-output" \
@@ -157,16 +167,26 @@ AWS_REGION="ap-south-1" \
 pnpm activate:customer \
   --customer-id "customer-id-from-find-customer" \
   --customer-email "customer@example.com" \
-  --customer-name "Customer Name"
+  --customer-name "Customer Name" \
+  --cafe-id "created-cafe-id" \
+  --cafe-name "Created Cafe Name" \
+  --cafe-slug "created-cafe-slug"
 ```
 
-## 10. Authenticated QR Smoke Test
-
-- [ ] Open `https://dev.mycaffe.in/qr/blue-bottle-demo`.
-- [ ] Scan or open the rendered QR URL.
-- [ ] Continue with Google.
-- [ ] Confirm active subscription is visible.
+- [ ] Refresh `/c/:slug`.
+- [ ] Verify active membership is visible.
 - [ ] Redeem one coffee.
 - [ ] Confirm a 4-digit verification code appears.
+- [ ] Staff visually verifies the 4-digit code.
 - [ ] Confirm remaining coffee count decreases by one.
 - [ ] Refresh and confirm redemption history remains visible.
+- [ ] Deactivate the cafe from the admin cafe detail page.
+- [ ] Refresh `/c/:slug`.
+- [ ] Confirm redemption is blocked with the inactive cafe message.
+
+## 10. Known Limitations
+
+- [ ] Staff verification is visual only; there is no staff-side verification action yet.
+- [ ] Cafe staff login is not implemented yet.
+- [ ] Razorpay is not integrated yet.
+- [ ] Customer subscription activation is manual for dev/MVP validation.
