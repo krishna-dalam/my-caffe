@@ -1,67 +1,28 @@
-import type { Cafe, UpdateCafeInput } from "@my-caffe/shared";
+import { createMemoryCafeStore, type MemoryCafeStore } from "../customer/memoryCafeStore.js";
 import type { AdminCafeRepository } from "./adminCafeRepository.js";
 
-export const createMemoryAdminCafeRepository = (): AdminCafeRepository => {
-  const cafesById = new Map<string, Cafe>();
-  const cafeIdsBySlug = new Map<string, string>();
+interface MemoryAdminCafeRepositoryOptions {
+  cafeStore?: MemoryCafeStore;
+}
 
+export const createMemoryAdminCafeRepository = ({
+  cafeStore = createMemoryCafeStore(),
+}: MemoryAdminCafeRepositoryOptions = {}): AdminCafeRepository => {
   return {
     async createCafe(cafe) {
-      if (cafeIdsBySlug.has(cafe.slug) || cafesById.has(cafe.cafeId)) {
-        return false;
-      }
-
-      cafesById.set(cafe.cafeId, cafe);
-      cafeIdsBySlug.set(cafe.slug, cafe.cafeId);
-      return true;
+      return cafeStore.createCafe(cafe);
     },
 
     async getCafe(cafeId) {
-      return cafesById.get(cafeId) ?? null;
+      return cafeStore.getCafe(cafeId);
     },
 
     async listCafes() {
-      return [...cafesById.values()].sort((left, right) => right.createdAt.localeCompare(left.createdAt));
+      return cafeStore.listCafes();
     },
 
     async updateCafe(cafeId, updates) {
-      const existing = cafesById.get(cafeId);
-      if (!existing) {
-        return null;
-      }
-
-      const next: Cafe = {
-        ...existing,
-        ...compactCafeUpdates(updates),
-        updatedAt: updates.updatedAt,
-      };
-
-      cafesById.set(cafeId, next);
-      return next;
+      return cafeStore.updateCafe(cafeId, updates);
     },
   };
 };
-
-const compactCafeUpdates = (updates: UpdateCafeInput): UpdateCafeInput => {
-  const compacted: UpdateCafeInput = {};
-  const updateKeys: Array<keyof UpdateCafeInput> = [
-    "address",
-    "area",
-    "city",
-    "contactEmail",
-    "contactName",
-    "contactPhone",
-    "googleMapsUrl",
-    "name",
-    "status",
-  ];
-
-  for (const key of updateKeys) {
-    if (key in updates) {
-      compacted[key] = updates[key] as never;
-    }
-  }
-
-  return compacted;
-};
-

@@ -3,9 +3,12 @@ import { validateCreateCafeInput, validateUpdateCafeInput } from "@my-caffe/shar
 import { randomUUID } from "node:crypto";
 import { env, readAdminEmails } from "../config/env.js";
 import { AdminCafeConflictError, type AdminCafeService, createAdminCafeService } from "../modules/admin/adminCafeService.js";
+import { createMemoryAdminCafeRepository } from "../modules/admin/memoryAdminCafeRepository.js";
 import { createAdminCafeRepository } from "../modules/admin/repositoryFactory.js";
 import type { CustomerService } from "../modules/customer/customerService.js";
 import { createCustomerService, RedeemCoffeeError } from "../modules/customer/customerService.js";
+import { createMemoryCafeStore } from "../modules/customer/memoryCafeStore.js";
+import { createMemoryCustomerRepository } from "../modules/customer/memoryCustomerRepository.js";
 import { createCustomerRepository } from "../modules/customer/repositoryFactory.js";
 import { createDynamoDocumentClient } from "../db/dynamodbClient.js";
 import { createDynamoWaitlistRepository, createMemoryWaitlistRepository } from "../modules/waitlist/waitlistRepository.js";
@@ -94,8 +97,12 @@ const isAdminPrincipal = (principal: ApiRequestPrincipal): boolean => {
 
 export const createRouter = (customerService?: CustomerService): AppRouter => {
   const localServicesByCustomerId = new Map<string, CustomerService>();
+  const memoryCafeStore = createMemoryCafeStore();
   const memoryWaitlistRepository = createMemoryWaitlistRepository();
-  const adminCafeService: AdminCafeService = createAdminCafeService(createAdminCafeRepository(), env.allowedOrigin);
+  const adminCafeService: AdminCafeService = createAdminCafeService(
+    env.customerRepository === "dynamodb" ? createAdminCafeRepository() : createMemoryAdminCafeRepository({ cafeStore: memoryCafeStore }),
+    env.allowedOrigin,
+  );
 
   const getService = (principal: ApiRequestPrincipal | null): CustomerService => {
     if (customerService) {
@@ -112,7 +119,7 @@ export const createRouter = (customerService?: CustomerService): AppRouter => {
       return existingService;
     }
 
-    const service = createDefaultCustomerService(customerId);
+    const service = createCustomerService(createMemoryCustomerRepository({ cafeStore: memoryCafeStore, customerId }));
     localServicesByCustomerId.set(customerId, service);
     return service;
   };

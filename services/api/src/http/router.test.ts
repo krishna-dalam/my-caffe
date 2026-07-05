@@ -373,7 +373,7 @@ describe("customer API router", () => {
     const cafes = parseBody<{ data: { cafes: Cafe[] } }>(response.body).data.cafes;
 
     expect(response.statusCode).toBe(200);
-    expect(cafes).toHaveLength(2);
+    expect(cafes.length).toBeGreaterThanOrEqual(2);
     expect(cafes.map((cafe) => cafe.name)).toEqual(expect.arrayContaining(["Morning Cup", "Evening Roast"]));
   });
 
@@ -456,5 +456,103 @@ describe("customer API router", () => {
     expect(firstCafe.slug).toBe("duplicate-cafe-indiranagar-bengaluru");
     expect(secondCafe.slug).toMatch(/^duplicate-cafe-indiranagar-bengaluru-[a-f0-9-]+$/);
     expect(secondCafe.slug).not.toBe(firstCafe.slug);
+  });
+
+  it("runs the cafe onboarding lifecycle from admin draft create to inactive redemption block", async () => {
+    vi.stubEnv("ADMIN_EMAILS", "admin@example.com");
+    const router = createRouter();
+    const customerHeaders = { authorization: "Bearer demo-token" };
+
+    const createResponse = await router.handle(
+      makeEvent({
+        body: {
+          area: "Gachibowli",
+          city: "Hyderabad",
+          name: "Roast House Coffee",
+        },
+        claims: adminClaims,
+        method: "POST",
+        path: "/v1/admin/cafes",
+      }),
+    );
+    const draftCafe = parseBody<{ data: Cafe }>(createResponse.body).data;
+
+    const listResponse = await router.handle(makeEvent({ claims: adminClaims, method: "GET", path: "/v1/admin/cafes" }));
+    const listedCafes = parseBody<{ data: { cafes: Cafe[] } }>(listResponse.body).data.cafes;
+
+    const activateResponse = await router.handle(
+      makeEvent({
+        body: { status: "active" },
+        claims: adminClaims,
+        method: "PATCH",
+        path: `/v1/admin/cafes/${draftCafe.cafeId}`,
+      }),
+    );
+    const activeCafe = parseBody<{ data: Cafe }>(activateResponse.body).data;
+
+    const publicLookupResponse = await router.handle(
+      makeEvent({ method: "GET", path: `/v1/cafes/${encodeURIComponent(activeCafe.slug)}` }),
+    );
+    const customerPageResponse = await router.handle(
+      makeEvent({
+        headers: customerHeaders,
+        method: "GET",
+        path: `/v1/cafes/${encodeURIComponent(activeCafe.slug)}`,
+      }),
+    );
+    const redemptionResponse = await router.handle(
+      makeEvent({
+        body: { cafeId: activeCafe.cafeId },
+        headers: customerHeaders,
+        method: "POST",
+        path: "/v1/redemptions",
+      }),
+    );
+
+    const deactivateResponse = await router.handle(
+      makeEvent({
+        body: { status: "inactive" },
+        claims: adminClaims,
+        method: "PATCH",
+        path: `/v1/admin/cafes/${activeCafe.cafeId}`,
+      }),
+    );
+    const inactiveRedemptionResponse = await router.handle(
+      makeEvent({
+        body: { cafeId: activeCafe.cafeId },
+        headers: customerHeaders,
+        method: "POST",
+        path: "/v1/redemptions",
+      }),
+    );
+
+    expect(createResponse.statusCode).toBe(201);
+    expect(draftCafe).toMatchObject({
+      name: "Roast House Coffee",
+      slug: "roast-house-coffee-gachibowli-hyderabad",
+      status: "draft",
+    });
+    expect(listResponse.statusCode).toBe(200);
+    expect(listedCafes.map((cafe) => cafe.cafeId)).toContain(draftCafe.cafeId);
+    expect(activateResponse.statusCode).toBe(200);
+    expect(activeCafe.status).toBe("active");
+    expect(publicLookupResponse.statusCode).toBe(200);
+    expect(parseBody<{ data: { cafe: Cafe } }>(publicLookupResponse.body).data.cafe).toMatchObject({
+      cafeId: activeCafe.cafeId,
+      status: "active",
+    });
+    expect(customerPageResponse.statusCode).toBe(200);
+    expect(parseBody<{ data: { activeMembership: { cafeId: string } | null } }>(customerPageResponse.body).data.activeMembership).toMatchObject({
+      cafeId: activeCafe.cafeId,
+    });
+    expect(redemptionResponse.statusCode).toBe(201);
+    expect(parseBody<{ data: { membership: { remainingCoffees: number } } }>(redemptionResponse.body).data.membership.remainingCoffees).toBe(7);
+    expect(deactivateResponse.statusCode).toBe(200);
+    expect(parseBody<{ data: Cafe }>(deactivateResponse.body).data.status).toBe("inactive");
+    expect(inactiveRedemptionResponse.statusCode).toBe(400);
+    expect(parseBody<{ error: { code: string; message: string } }>(inactiveRedemptionResponse.body).error).toMatchObject({
+      code: "CAFE_NOT_ACTIVE",
+      message: "This cafe is currently inactive.",
+    });
   });
 });

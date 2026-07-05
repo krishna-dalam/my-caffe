@@ -1,17 +1,6 @@
 import type { Cafe, Customer, Membership, Redemption } from "@my-caffe/shared";
 import type { CustomerProfileInput, CustomerRepository } from "./customerRepository.js";
-
-const demoCafe: Cafe = {
-  area: "Indiranagar",
-  cafeId: "cafe_demo_001",
-  city: "Bengaluru",
-  createdAt: "2026-01-01T00:00:00.000Z",
-  name: "Blue Bottle Demo Cafe",
-  slug: "blue-bottle-demo",
-  status: "active",
-  updatedAt: "2026-01-01T00:00:00.000Z",
-  address: "Indiranagar, Bengaluru",
-};
+import { createMemoryCafeStore, demoCafe, type MemoryCafeStore } from "./memoryCafeStore.js";
 
 const demoCustomer: Customer = {
   customerId: "customer_demo_001",
@@ -21,6 +10,7 @@ const demoCustomer: Customer = {
 
 interface MemoryCustomerRepositoryOptions {
   cafe?: Cafe;
+  cafeStore?: MemoryCafeStore;
   customerId?: string;
 }
 
@@ -53,24 +43,40 @@ const makeMembership = (customerId: string, cafeId = demoCafe.cafeId): Membershi
 
 export const createMemoryCustomerRepository = ({
   cafe = demoCafe,
+  cafeStore = createMemoryCafeStore([cafe]),
   customerId = demoCustomer.customerId,
 }: MemoryCustomerRepositoryOptions = {}): CustomerRepository => {
   let customer = makeCustomer(customerId);
-  let membership = makeMembership(customer.customerId, cafe.cafeId);
+  const membershipsByCafeId = new Map<string, Membership>([[cafe.cafeId, makeMembership(customer.customerId, cafe.cafeId)]]);
   let redemptions: Redemption[] = [];
+
+  const getOrCreateMembership = (cafeId: string): Membership | null => {
+    if (!cafeStore.getCafe(cafeId)) {
+      return null;
+    }
+
+    const existingMembership = membershipsByCafeId.get(cafeId);
+    if (existingMembership) {
+      return existingMembership;
+    }
+
+    const membership = makeMembership(customer.customerId, cafeId);
+    membershipsByCafeId.set(cafeId, membership);
+    return membership;
+  };
 
   return {
     async commitRedemption(_currentMembership, nextMembership, redemption) {
-      membership = nextMembership;
+      membershipsByCafeId.set(nextMembership.cafeId, nextMembership);
       redemptions = [redemption, ...redemptions];
     },
 
     async findCafeBySlug(slug) {
-      return slug === cafe.slug ? cafe : null;
+      return cafeStore.findCafeBySlug(slug);
     },
 
     async getCafeById(cafeId) {
-      return cafe.cafeId === cafeId ? cafe : null;
+      return cafeStore.getCafe(cafeId);
     },
 
     async getCurrentCustomer() {
@@ -92,7 +98,7 @@ export const createMemoryCustomerRepository = ({
     },
 
     async getMembershipForCafe(cafeId) {
-      return membership.cafeId === cafeId ? membership : null;
+      return getOrCreateMembership(cafeId);
     },
 
     async listRedemptions(cafeId) {
