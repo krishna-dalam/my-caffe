@@ -20,10 +20,10 @@ interface StoredTokens {
 }
 
 const storageKeys = {
-  pkceVerifier: "my-caffe.auth.pkce-verifier",
-  returnPath: "my-caffe.auth.return-path",
-  state: "my-caffe.auth.state",
-  tokens: "my-caffe.auth.tokens",
+  pkceVerifier: "my-caffe.admin.auth.pkce-verifier",
+  returnPath: "my-caffe.admin.auth.return-path",
+  state: "my-caffe.admin.auth.state",
+  tokens: "my-caffe.admin.auth.tokens",
 };
 
 const normalizeDomain = (domain: string): string => domain.replace(/\/+$/, "");
@@ -35,7 +35,13 @@ const requireHostedUiConfig = (config: CognitoHostedUiConfig): void => {
 };
 
 const normalizeReturnPath = (returnPath: string | undefined): string => {
-  if (!returnPath || !returnPath.startsWith("/") || returnPath.startsWith("//") || returnPath.startsWith("/auth/callback")) {
+  if (
+    !returnPath ||
+    !returnPath.startsWith("/") ||
+    returnPath.startsWith("//") ||
+    returnPath.startsWith("/auth/callback") ||
+    returnPath.startsWith("/admin/auth/callback")
+  ) {
     return "/admin/cafes";
   }
 
@@ -172,4 +178,3 @@ export const clearAuthSession = (): void => {
   window.sessionStorage.removeItem(storageKeys.state);
   window.sessionStorage.removeItem(storageKeys.tokens);
 };
-

@@ -5,7 +5,7 @@ export type AdminRoute =
   | { name: "cafeNew" };
 
 export const parseAdminRoute = (pathname: string): AdminRoute => {
-  if (pathname === "/auth/callback") {
+  if (pathname === "/admin/auth/callback") {
     return { name: "authCallback" };
   }
 
@@ -20,4 +20,3 @@ export const parseAdminRoute = (pathname: string): AdminRoute => {
 
   return { name: "cafeList" };
 };
-

@@ -186,6 +186,8 @@ The command checks:
 - `https://api.dev.mycaffe.in/v1/health`
 - `https://api.dev.mycaffe.in/v1/cafes/blue-bottle-demo`
 
+Also open `https://dev.mycaffe.in/admin/cafes` to confirm the admin web app is deployed under the same CloudFront distribution.
+
 Override defaults when needed:
 
 ```sh
@@ -200,7 +202,7 @@ pnpm smoke:dev
 After deploy, validate a real cafe onboarding path from the admin UI.
 
 1. Sign in to the admin web app with an email listed in `ADMIN_EMAILS`.
-2. Open `/admin/cafes`.
+2. Open `https://dev.mycaffe.in/admin/cafes`.
 3. Create a cafe.
 4. Verify the generated cafe slug on the cafe detail page.
 5. Set the cafe status to `active`.

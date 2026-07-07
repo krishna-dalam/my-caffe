@@ -9,7 +9,7 @@ if (!rootElement) {
 }
 
 const bootstrap = async (): Promise<void> => {
-  await loadRuntimeConfig();
+  await loadRuntimeConfig("/admin/config.json");
   const { App } = await import("./App");
 
   createRoot(rootElement).render(
@@ -20,4 +20,3 @@ const bootstrap = async (): Promise<void> => {
 };
 
 void bootstrap();
-

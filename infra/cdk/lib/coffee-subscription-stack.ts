@@ -21,7 +21,7 @@ export class CoffeeSubscriptionStack extends cdk.Stack {
     });
 
     const auth = new AuthConstruct(this, "Auth", {
-      callbackUrls: [`${config.allowedOrigin}/auth/callback`],
+      callbackUrls: [`${config.allowedOrigin}/auth/callback`, `${config.allowedOrigin}/admin/auth/callback`],
       cognitoDomainPrefix: config.cognitoDomainPrefix,
       googleClientId: config.googleClientId,
       googleClientSecretName: config.googleClientSecretName,
@@ -48,6 +48,15 @@ export class CoffeeSubscriptionStack extends cdk.Stack {
     });
 
     const website = new WebsiteConstruct(this, "Website", {
+      adminRuntimeConfig: {
+        apiBaseUrl: `${config.apiCertificateArn ? `https://${config.apiDomainName}` : api.api.apiEndpoint}/v1`,
+        appName: "My Caffe Admin",
+        cognitoClientId: auth.userPoolClient.userPoolClientId,
+        cognitoDomain: config.cognitoDomainPrefix
+          ? `https://${config.cognitoDomainPrefix}.auth.${cdk.Stack.of(this).region}.amazoncognito.com`
+          : "",
+        cognitoRedirectUri: `${config.allowedOrigin}/admin/auth/callback`,
+      },
       certificateArn: config.webCertificateArn,
       domainName: config.webDomainName,
       hostedZone,

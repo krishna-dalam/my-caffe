@@ -16,10 +16,10 @@ const readEnv = (key: string): string | undefined => {
 
 const getDefaultRedirectUri = (): string => {
   if (typeof window === "undefined") {
-    return "http://localhost:5174/auth/callback";
+    return "http://localhost:5174/admin/auth/callback";
   }
 
-  return window.location.origin + "/auth/callback";
+  return window.location.origin + "/admin/auth/callback";
 };
 
 const isRuntimeConfig = (value: unknown): value is RuntimeConfig => {
@@ -76,4 +76,3 @@ export const loadRuntimeConfig = async (configUrl = "/config.json"): Promise<voi
     // Local development does not need a runtime config file.
   }
 };
-

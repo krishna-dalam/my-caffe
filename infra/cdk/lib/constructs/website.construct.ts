@@ -11,6 +11,7 @@ import { existsSync } from "node:fs";
 import { join } from "node:path";
 
 interface WebsiteConstructProps {
+  adminRuntimeConfig: Record<string, string | boolean>;
   certificateArn?: string;
   domainName: string;
   hostedZone?: route53.IHostedZone;
@@ -25,8 +26,12 @@ export class WebsiteConstruct extends Construct {
     super(scope, id);
 
     const webDistPath = join(process.cwd(), "../../apps/customer-web/dist");
+    const adminDistPath = join(process.cwd(), "../../apps/admin-web/dist");
     if (!existsSync(webDistPath)) {
       throw new Error("apps/customer-web/dist is missing. Run `pnpm --filter @my-caffe/customer-web build` before CDK synth.");
+    }
+    if (!existsSync(adminDistPath)) {
+      throw new Error("apps/admin-web/dist is missing. Run `pnpm --filter @my-caffe/admin-web build` before CDK synth.");
     }
 
     const certificate = props.certificateArn
@@ -40,9 +45,38 @@ export class WebsiteConstruct extends Construct {
       removalPolicy: cdk.RemovalPolicy.RETAIN,
     });
 
+    const adminSpaRewriteFunction = new cloudfront.Function(this, "AdminSpaRewriteFunction", {
+      code: cloudfront.FunctionCode.fromInline(`
+function handler(event) {
+  var request = event.request;
+  var uri = request.uri;
+
+  if (uri === "/admin" || uri === "/admin/") {
+    request.uri = "/admin/index.html";
+    return request;
+  }
+
+  if (uri.indexOf("/admin/") === 0) {
+    var filename = uri.substring(uri.lastIndexOf("/") + 1);
+    if (filename.indexOf(".") === -1) {
+      request.uri = "/admin/index.html";
+    }
+  }
+
+  return request;
+}
+`),
+    });
+
     this.distribution = new cloudfront.Distribution(this, "CustomerWebDistribution", {
       certificate,
       defaultBehavior: {
+        functionAssociations: [
+          {
+            eventType: cloudfront.FunctionEventType.VIEWER_REQUEST,
+            function: adminSpaRewriteFunction,
+          },
+        ],
         origin: origins.S3BucketOrigin.withOriginAccessControl(this.bucket),
         viewerProtocolPolicy: cloudfront.ViewerProtocolPolicy.REDIRECT_TO_HTTPS,
       },
@@ -69,6 +103,17 @@ export class WebsiteConstruct extends Construct {
       sources: [
         s3deploy.Source.asset(webDistPath),
         s3deploy.Source.jsonData("config.json", props.runtimeConfig),
+      ],
+    });
+
+    new s3deploy.BucketDeployment(this, "AdminWebDeployment", {
+      destinationBucket: this.bucket,
+      destinationKeyPrefix: "admin",
+      distribution: this.distribution,
+      distributionPaths: ["/admin/*"],
+      sources: [
+        s3deploy.Source.asset(adminDistPath),
+        s3deploy.Source.jsonData("config.json", props.adminRuntimeConfig),
       ],
     });
 

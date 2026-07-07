@@ -136,11 +136,12 @@ pnpm smoke:dev
 - [ ] Confirm `/config.json` points to `https://api.dev.mycaffe.in/v1`.
 - [ ] Confirm API health passes.
 - [ ] Confirm unauthenticated cafe landing passes.
+- [ ] Confirm admin app loads at `https://dev.mycaffe.in/admin/cafes`.
 
 ## 9. Cafe Onboarding Smoke Test
 
 - [ ] Sign in to the admin web app with an email listed in `ADMIN_EMAILS`.
-- [ ] Open `/admin/cafes`.
+- [ ] Open `https://dev.mycaffe.in/admin/cafes`.
 - [ ] Create a cafe from the admin UI.
 - [ ] Verify the generated cafe slug on the cafe detail page.
 - [ ] Set the cafe status to `active`.
