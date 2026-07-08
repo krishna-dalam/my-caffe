@@ -6,7 +6,7 @@
   "main": "./dist/handler.js",
   "scripts": {
     "activate:customer": "tsx src/scripts/activateCustomer.ts",
-    "build": "tsc -p tsconfig.json && node scripts/write-lambda-package-json.mjs",
+    "build": "pnpm --filter @my-caffe/shared build && tsc -p tsconfig.json && node scripts/write-lambda-package-json.mjs",
     "dev": "tsx src/localServer.ts",
     "find:customer": "tsx src/scripts/findCustomer.ts",
     "seed:dev-cafe": "tsx src/scripts/seedDevCafe.ts",

@@ -5,7 +5,7 @@
   "packageManager": "pnpm@9.15.4",
   "scripts": {
     "activate:customer": "pnpm --filter @my-caffe/api run activate:customer",
-    "build": "pnpm -r build",
+    "build": "pnpm --filter @my-caffe/shared build && pnpm -r --filter \"!@my-caffe/shared\" build",
     "dev:admin": "pnpm --filter @my-caffe/admin-web run dev",
     "dev:api": "pnpm --filter @my-caffe/api run dev",
     "dev:customer": "pnpm --filter @my-caffe/customer-web run dev",
